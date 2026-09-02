@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment Success — SuppVerse BD</title>
+<style>
+:root {
+  --c-bg: #f3f4f6;
+  --c-surface: #ffffff;
+  --c-surface-2: #e5e7eb;
+  --c-text: #111827;
+  --c-text-dim: #6b7280;
+  --c-accent: #10b981;
+  --c-accent-glow: rgba(16,185,129,0.15);
+  --c-badge-bg: #22c55e;
+  --c-oid-bg: rgba(139,92,246,0.10);
+  --c-oid-border: rgba(139,92,246,0.25);
+  --c-oid-text: #7c3aed;
+  --shadow-lg: 0 25px 50px -12px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04) inset;
+  --radius: 24px;
+  --font: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: var(--font);
+  background: var(--c-bg);
+  color: var(--c-text);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(243,244,246,0.88);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.modal-overlay.show { opacity: 1; pointer-events: auto; }
+.success-card {
+  position: relative;
+  background: var(--c-surface);
+  border: 1px solid var(--c-surface-2);
+  border-radius: var(--radius);
+  padding: 32px 36px 28px;
+  width: min(90vw, 360px);
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+  transform: scale(0.85) translateY(20px);
+  opacity: 0;
+  overflow: hidden;
+  transition: transform 0.6s cubic-bezier(0.16,1,0.3,1), opacity 0.5s ease;
+  z-index: 2;
+}
+.modal-overlay.show .success-card {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+.confetti-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+.badge-wrap {
+  position: relative;
+  width: 72px; height: 72px;
+  margin: 0 auto 20px;
+  z-index: 2;
+}
+.badge-wrap::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--c-accent-glow) 0%, transparent 70%);
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.5s cubic-bezier(0.16,1,0.3,1) 0.3s;
+}
+.modal-overlay.show .badge-wrap::before { opacity: 1; transform: scale(1.3); }
+.badge {
+  width: 72px; height: 72px;
+  background: var(--c-badge-bg);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+  transform: scale(0);
+  transition: transform 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.2s;
+  box-shadow: 0 8px 32px rgba(34,197,94,0.25);
+}
+.modal-overlay.show .badge { transform: scale(1); }
+.badge svg {
+  width: 34px; height: 34px;
+  stroke: #fff;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  transition: stroke-dashoffset 0.6s ease 0.6s;
+}
+.modal-overlay.show .badge svg { stroke-dashoffset: 0; }
+.success-title {
+  position: relative;
+  z-index: 2;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: all 0.5s ease 0.5s;
+}
+.modal-overlay.show .success-title { opacity: 1; transform: translateY(0); }
+.success-desc {
+  position: relative;
+  z-index: 2;
+  font-size: 0.875rem;
+  color: var(--c-text-dim);
+  line-height: 1.5;
+  margin-bottom: 20px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.5s ease 0.65s;
+}
+.modal-overlay.show .success-desc { opacity: 1; transform: translateY(0); }
+.oid-badge {
+  display: inline-block;
+  background: var(--c-oid-bg);
+  border: 1px solid var(--c-oid-border);
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--c-oid-text);
+  font-family: 'Courier Prime', 'Courier New', monospace;
+  letter-spacing: 0.02em;
+  vertical-align: middle;
+}
+.amount-pill {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 999px;
+  padding: 8px 20px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--c-badge-bg);
+  margin-bottom: 20px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.4s ease 0.8s;
+}
+.modal-overlay.show .amount-pill { opacity: 1; transform: translateY(0); }
+.amount-pill span { font-size: 0.8125rem; opacity: 0.7; font-weight: 500; }
+.btn-done {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 14px;
+  background: var(--c-accent);
+  color: #fff;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+.modal-overlay.show .btn-done {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.4s ease 0.95s, transform 0.4s ease 0.95s, box-shadow 0.2s ease, filter 0.2s ease;
+}
+.btn-done:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(16,185,129,0.3);
+  filter: brightness(1.05);
+}
+.btn-done:active { transform: translateY(0); }
+.demo-trigger {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+}
+.btn-trigger {
+  padding: 12px 28px;
+  border: 1px solid var(--c-surface-2);
+  border-radius: 12px;
+  background: var(--c-surface);
+  color: var(--c-text);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.btn-trigger:hover {
+  background: var(--c-surface-2);
+  border-color: var(--c-accent);
+  color: var(--c-accent);
+}
+</style>
+</head>
+<body>
+
+<div id="modalOverlay" class="modal-overlay">
+  <div class="success-card">
+    <canvas id="confettiCanvas" class="confetti-canvas"></canvas>
+    <div class="badge-wrap">
+      <div class="badge">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+    </div>
+    <h2 class="success-title">Payment Confirmed</h2>
+    <p class="success-desc">Payment for Order <span class="oid-badge">SV-1001</span> has been confirmed.</p>
+    <div class="amount-pill"><span>৳</span> 2,450.00</div>
+    <button class="btn-done" onclick="closeSuccess()">Done</button>
+  </div>
+</div>
+
+<div class="demo-trigger">
+  <button class="btn-trigger" onclick="replaySuccess()">🎉 Replay Animation</button>
+</div>
+
+<script>
+const canvas = document.getElementById('confettiCanvas');
+const ctx = canvas.getContext('2d');
+let animId = null;
+let particles = [];
+let isRaining = false;
+let lastTime = 0;
+
+const COLORS = [
+  '#22c55e','#10b981','#34d399','#6ee7b7',
+  '#f59e0b','#fbbf24','#fcd34d',
+  '#3b82f6','#06b6d4','#60a5fa',
+  '#ec4899','#f43f5e','#fb7185',
+  '#8b5cf6','#a78bfa','#c4b5fd'
+];
+
+const SHAPES = ['triangle', 'rectangle', 'capsule'];
+
+function resizeCanvas() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+resizeCanvas();
+
+class Particle {
+  constructor(x, y, type = 'rain') {
+    this.x = x;
+    this.y = y;
+    this.type = type;
+    this.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+    this.shape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+    this.rotation = Math.random() * Math.PI * 2;
+    this.rotSpeed = (Math.random() - 0.5) * 3;
+    this.wobble = Math.random() * Math.PI * 2;
+    this.wobbleSpeed = Math.random() * 2 + 1;
+
+    if (this.shape === 'triangle') {
+      this.size = Math.random() * 5 + 4;
+    } else if (this.shape === 'rectangle') {
+      this.w = Math.random() * 6 + 4;
+      this.h = this.w * (Math.random() * 0.6 + 0.3);
+    } else if (this.shape === 'capsule') {
+      this.w = Math.random() * 7 + 5;
+      this.h = this.w * (Math.random() * 0.35 + 0.25);
+      this.radius = Math.min(this.w, this.h) / 2;
+    }
+
+    if (type === 'blast') {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 180 + 120;
+      this.vx = Math.cos(angle) * speed;
+      this.vy = Math.sin(angle) * speed - 80;
+      this.gravity = 220;
+      this.drag = 0.985;
+      this.life = 1;
+      this.decay = Math.random() * 0.25 + 0.18;
+    } else {
+      this.vx = (Math.random() - 0.5) * 25;
+      this.vy = Math.random() * 50 + 35;
+      this.gravity = 22;
+      this.drag = 0.999;
+      this.life = 1;
+      this.decay = 0;
+    }
+  }
+
+  update(dt) {
+    this.vx *= Math.pow(this.drag, dt * 60);
+    this.vy += this.gravity * dt;
+    this.x += this.vx * dt;
+    this.y += this.vy * dt;
+    this.rotation += this.rotSpeed * dt;
+    this.wobble += this.wobbleSpeed * dt;
+
+    if (this.type === 'rain') {
+      this.x += Math.sin(this.wobble) * 15 * dt;
+    }
+
+    if (this.type === 'blast') {
+      this.life -= this.decay * dt;
+    }
+  }
+
+  draw() {
+    const alpha = this.type === 'blast' ? Math.max(0, this.life) : 1;
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.rotation);
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = this.color;
+
+    if (this.shape === 'triangle') {
+      const s = this.size;
+      ctx.beginPath();
+      ctx.moveTo(0, -s);
+      ctx.lineTo(s * 0.866, s * 0.5);
+      ctx.lineTo(-s * 0.866, s * 0.5);
+      ctx.closePath();
+      ctx.fill();
+    } else if (this.shape === 'rectangle') {
+      ctx.beginPath();
+      ctx.roundRect(-this.w/2, -this.h/2, this.w, this.h, 1.2);
+      ctx.fill();
+    } else if (this.shape === 'capsule') {
+      const r = this.radius;
+      const hw = this.w / 2;
+      const hh = this.h / 2;
+      ctx.beginPath();
+      ctx.moveTo(-hw + r, -hh);
+      ctx.lineTo(hw - r, -hh);
+      ctx.arc(hw - r, 0, r, -Math.PI / 2, Math.PI / 2);
+      ctx.lineTo(-hw + r, hh);
+      ctx.arc(-hw + r, 0, r, Math.PI / 2, -Math.PI / 2);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    ctx.restore();
+  }
+
+  isDead(w, h) {
+    if (this.type === 'blast') return this.life <= 0;
+    return this.y > h + 15 || this.x < -20 || this.x > w + 20;
+  }
+}
+
+function spawnBlast() {
+  const rect = canvas.getBoundingClientRect();
+  const cx = rect.width / 2;
+  const cy = rect.height * 0.18;
+  for (let i = 0; i < 70; i++) {
+    particles.push(new Particle(cx, cy, 'blast'));
+  }
+}
+
+let rainTimer = 0;
+function spawnRain(dt) {
+  rainTimer += dt;
+  if (rainTimer > 0.06) {
+    rainTimer = 0;
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.random() * rect.width;
+    particles.push(new Particle(x, -8, 'rain'));
+  }
+}
+
+function loop(timestamp) {
+  const dt = Math.min((timestamp - lastTime) / 1000, 0.05);
+  lastTime = timestamp;
+
+  const rect = canvas.getBoundingClientRect();
+  ctx.clearRect(0, 0, rect.width, rect.height);
+
+  if (isRaining) spawnRain(dt);
+
+  particles = particles.filter(p => {
+    p.update(dt);
+    p.draw();
+    return !p.isDead(rect.width, rect.height);
+  });
+
+  if (particles.length > 0 || isRaining) {
+    animId = requestAnimationFrame(loop);
+  } else {
+    animId = null;
+  }
+}
+
+function startConfetti() {
+  resizeCanvas();
+  particles = [];
+  isRaining = true;
+  rainTimer = 0;
+  lastTime = performance.now();
+  spawnBlast();
+  if (!animId) animId = requestAnimationFrame(loop);
+}
+
+function stopConfetti() {
+  isRaining = false;
+}
+
+function openSuccess() {
+  document.getElementById('modalOverlay').classList.add('show');
+  setTimeout(startConfetti, 280);
+}
+function closeSuccess() {
+  document.getElementById('modalOverlay').classList.remove('show');
+  stopConfetti();
+}
+function replaySuccess() {
+  closeSuccess();
+  setTimeout(openSuccess, 500);
+}
+
+window.addEventListener('DOMContentLoaded', () => setTimeout(openSuccess, 300));
+window.addEventListener('resize', resizeCanvas);
+</script>
+</body>
+</html>
