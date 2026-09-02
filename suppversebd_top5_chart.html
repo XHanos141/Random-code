@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Top 5 Sales vs Returns — SuppVerseBD</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f4f5f9;
+      --card: #ffffff;
+      --text: #001f3c;
+      --muted: #8c92a1;
+      --line: #e0e2e8;
+      --shadow: 0 24px 70px rgba(0,0,0,0.10);
+      --money: #059669;
+      --money-returns: #d95353;
+      --toggle-text: #6b7280;
+      --sku-glow: rgba(6, 182, 212, 0.28);
+      --sku-color: #0891b2;
+
+      --g1: #2f9b68;
+      --g2: #2f9b68;
+      --g3: #2f9b68;
+      --g4: #2f9b68;
+      --g5: #2f9b68;
+
+      --r1: #d95353;
+      --r2: #d95353;
+      --r3: #d95353;
+      --r4: #d95353;
+      --r5: #d95353;
+    }
+
+    body.dark {
+      --bg: #0f1621;
+      --card: #1b2738;
+      --text: #eef4ff;
+      --muted: #9ca8bc;
+      --line: rgba(255,255,255,0.06);
+      --shadow: 0 24px 70px rgba(0,0,0,0.35);
+      --money: #34d399;
+      --money-returns: #f87171;
+      --toggle-text: #9ca3af;
+      --sku-glow: rgba(34, 211, 238, 0.32);
+      --sku-color: #22d3ee;
+
+      --g1: #2f9b68;
+      --g2: #2f9b68;
+      --g3: #2f9b68;
+      --g4: #2f9b68;
+      --g5: #2f9b68;
+
+      --r1: #d95353;
+      --r2: #d95353;
+      --r3: #d95353;
+      --r4: #d95353;
+      --r5: #d95353;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "DM Sans", sans-serif;
+      background: var(--bg);
+      display: grid;
+      place-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      transition: background 0.45s ease;
+    }
+
+    .phone {
+      width: 390px;
+      max-width: 100%;
+      background: var(--card);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      padding: 20px 22px 22px;
+      transition: background 0.35s ease, box-shadow 0.35s ease;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 4px;
+    }
+
+    .chart-title-group { display: flex; flex-direction: column; gap: 2px; }
+
+    .chart-title {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.01em;
+      transition: color 0.35s ease;
+    }
+
+    .chart-subtitle {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      transition: color 0.35s ease;
+    }
+
+    /* ════════════════════════════════════════
+       GLASS TOGGLE — Perfect Bounce
+       ════════════════════════════════════════ */
+    .toggle-wrap {
+      position: relative;
+      display: inline-flex;
+      background: #e8f5e9;
+      border: 2px solid #c8e6c9;
+      border-radius: 999px;
+      padding: 4px;
+      gap: 4px;
+      transition: background 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+                  border-color 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+                  box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow:
+        0 4px 6px rgba(0,0,0,0.05),
+        0 10px 20px rgba(0,0,0,0.08),
+        inset 0 1px 1px rgba(255,255,255,0.8);
+    }
+
+    body.dark .toggle-wrap {
+      background: rgba(27, 67, 50, 0.6);
+      border-color: rgba(45, 106, 79, 0.5);
+      box-shadow:
+        0 4px 6px rgba(0,0,0,0.3),
+        0 10px 20px rgba(0,0,0,0.4),
+        inset 0 1px 1px rgba(255,255,255,0.1),
+        0 0 0 1px rgba(255,255,255,0.05);
+      backdrop-filter: blur(12px);
+    }
+
+    .toggle-wrap.returns {
+      background: #ffebee;
+      border-color: #ffcdd2;
+    }
+
+    body.dark .toggle-wrap.returns {
+      background: rgba(61, 31, 31, 0.6);
+      border-color: rgba(127, 29, 29, 0.5);
+      box-shadow:
+        0 4px 6px rgba(0,0,0,0.3),
+        0 10px 20px rgba(0,0,0,0.4),
+        inset 0 1px 1px rgba(255,255,255,0.1),
+        0 0 0 1px rgba(255,255,255,0.05);
+    }
+
+    .toggle-indicator {
+      position: absolute;
+      top: 4px;
+      bottom: 4px;
+      left: 4px;
+      width: calc(50% - 4px);
+      border-radius: 999px;
+      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                  background 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+                  box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 0;
+    }
+
+    .toggle-indicator {
+      background: linear-gradient(180deg, #4caf7d 0%, #2f9b68 60%, #268a5c 100%);
+      box-shadow:
+        0 6px 12px rgba(47, 155, 104, 0.3),
+        0 2px 4px rgba(0,0,0,0.08),
+        inset 0 -2px 4px rgba(0,0,0,0.1),
+        inset 0 1px 1px rgba(255,255,255,0.2);
+    }
+
+    body.dark .toggle-indicator {
+      background: linear-gradient(180deg, rgba(74, 222, 128, 0.9) 0%, rgba(52, 211, 153, 0.85) 60%, rgba(43, 184, 131, 0.9) 100%);
+      box-shadow:
+        0 0 20px rgba(52, 211, 153, 0.25),
+        0 6px 12px rgba(0,0,0,0.3),
+        0 2px 4px rgba(0,0,0,0.2),
+        inset 0 -2px 4px rgba(0,0,0,0.2),
+        inset 0 1px 1px rgba(255,255,255,0.25),
+        inset 0 3px 6px rgba(255,255,255,0.1);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .toggle-wrap.returns .toggle-indicator {
+      background: linear-gradient(180deg, #e57373 0%, #c0392b 60%, #a93226 100%);
+      box-shadow:
+        0 6px 12px rgba(192, 57, 43, 0.3),
+        0 2px 4px rgba(0,0,0,0.08),
+        inset 0 -2px 4px rgba(0,0,0,0.1),
+        inset 0 1px 1px rgba(255,255,255,0.2);
+    }
+
+    body.dark .toggle-wrap.returns .toggle-indicator {
+      background: linear-gradient(180deg, rgba(251, 113, 133, 0.9) 0%, rgba(248, 113, 113, 0.85) 60%, rgba(239, 68, 68, 0.9) 100%);
+      box-shadow:
+        0 0 20px rgba(248, 113, 113, 0.25),
+        0 6px 12px rgba(0,0,0,0.3),
+        0 2px 4px rgba(0,0,0,0.2),
+        inset 0 -2px 4px rgba(0,0,0,0.2),
+        inset 0 1px 1px rgba(255,255,255,0.25),
+        inset 0 3px 6px rgba(255,255,255,0.1);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .toggle-btn {
+      position: relative;
+      z-index: 1;
+      border: none;
+      background: transparent;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 8px 20px;
+      border-radius: 999px;
+      cursor: pointer;
+      color: #6b7280;
+      transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      min-width: 72px;
+      text-align: center;
+    }
+
+    .toggle-btn.active { color: #ffffff; }
+
+    body.dark .toggle-btn { color: rgba(255,255,255,0.5); }
+    body.dark .toggle-btn.active { color: #ffffff; text-shadow: 0 0 8px rgba(255,255,255,0.3); }
+
+    .product-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .product-row {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .product-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .product-name {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      transition: color 0.35s ease;
+    }
+
+    /* ─── Unit Pill — matches bar color ─── */
+    .product-units {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      transition: color 0.35s ease, background 0.35s ease, border-color 0.35s ease;
+    }
+
+    .product-units.text-1 {
+      color: var(--g1);
+      background: rgba(47, 155, 104, 0.12);
+      border: 1px solid rgba(47, 155, 104, 0.25);
+    }
+    .product-units.text-2 {
+      color: var(--g2);
+      background: rgba(47, 155, 104, 0.12);
+      border: 1px solid rgba(47, 155, 104, 0.25);
+    }
+    .product-units.text-3 {
+      color: var(--g3);
+      background: rgba(47, 155, 104, 0.12);
+      border: 1px solid rgba(47, 155, 104, 0.25);
+    }
+    .product-units.text-4 {
+      color: var(--g4);
+      background: rgba(47, 155, 104, 0.12);
+      border: 1px solid rgba(47, 155, 104, 0.25);
+    }
+    .product-units.text-5 {
+      color: var(--g5);
+      background: rgba(47, 155, 104, 0.12);
+      border: 1px solid rgba(47, 155, 104, 0.25);
+    }
+
+    .mode-returns .product-units.text-1 {
+      color: var(--r1);
+      background: rgba(217, 83, 83, 0.12);
+      border: 1px solid rgba(217, 83, 83, 0.25);
+    }
+    .mode-returns .product-units.text-2 {
+      color: var(--r2);
+      background: rgba(217, 83, 83, 0.12);
+      border: 1px solid rgba(217, 83, 83, 0.25);
+    }
+    .mode-returns .product-units.text-3 {
+      color: var(--r3);
+      background: rgba(217, 83, 83, 0.12);
+      border: 1px solid rgba(217, 83, 83, 0.25);
+    }
+    .mode-returns .product-units.text-4 {
+      color: var(--r4);
+      background: rgba(217, 83, 83, 0.12);
+      border: 1px solid rgba(217, 83, 83, 0.25);
+    }
+    .mode-returns .product-units.text-5 {
+      color: var(--r5);
+      background: rgba(217, 83, 83, 0.12);
+      border: 1px solid rgba(217, 83, 83, 0.25);
+    }
+
+    body.dark .product-units.text-1,
+    body.dark .product-units.text-2,
+    body.dark .product-units.text-3,
+    body.dark .product-units.text-4,
+    body.dark .product-units.text-5 {
+      background: rgba(47, 155, 104, 0.15);
+      border: 1px solid rgba(47, 155, 104, 0.3);
+    }
+
+    body.dark .mode-returns .product-units.text-1,
+    body.dark .mode-returns .product-units.text-2,
+    body.dark .mode-returns .product-units.text-3,
+    body.dark .mode-returns .product-units.text-4,
+    body.dark .mode-returns .product-units.text-5 {
+      background: rgba(217, 83, 83, 0.15);
+      border: 1px solid rgba(217, 83, 83, 0.3);
+    }
+
+    /* ─── Amount: green for sales, red for returns ─── */
+    .product-price {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--money);
+      min-width: 56px;
+      text-align: right;
+      transition: color 0.35s ease;
+    }
+
+    .mode-returns .product-price {
+      color: var(--money-returns);
+    }
+
+    .product-bar-line {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .product-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      transition: background 0.4s ease;
+    }
+
+    .product-bar-track {
+      flex: 1;
+      height: 8px;
+      background: var(--line);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+      transition: background 0.35s ease;
+    }
+
+    .product-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.9s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.4s ease;
+      width: 0%;
+    }
+
+    /* ─── SKU ─── */
+    .product-sku {
+      font-family: "Courier Prime", "Courier New", monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--sku-color);
+      padding-left: 18px;
+      transition: color 0.35s ease;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      text-shadow: 0 3px 10px var(--sku-glow);
+    }
+
+    .sentiment-1 { background: var(--g1); }
+    .sentiment-2 { background: var(--g2); }
+    .sentiment-3 { background: var(--g3); }
+    .sentiment-4 { background: var(--g4); }
+    .sentiment-5 { background: var(--g5); }
+
+    .text-1 { color: var(--g1); }
+    .text-2 { color: var(--g2); }
+    .text-3 { color: var(--g3); }
+    .text-4 { color: var(--g4); }
+    .text-5 { color: var(--g5); }
+
+    .mode-returns .sentiment-1 { background: var(--r1); }
+    .mode-returns .sentiment-2 { background: var(--r2); }
+    .mode-returns .sentiment-3 { background: var(--r3); }
+    .mode-returns .sentiment-4 { background: var(--r4); }
+    .mode-returns .sentiment-5 { background: var(--r5); }
+
+    .mode-returns .text-1 { color: var(--r1); }
+    .mode-returns .text-2 { color: var(--r2); }
+    .mode-returns .text-3 { color: var(--r3); }
+    .mode-returns .text-4 { color: var(--r4); }
+    .mode-returns .text-5 { color: var(--r5); }
+
+    .demo-controls {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .demo-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: none;
+      background: var(--card);
+      color: var(--text);
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease;
+    }
+
+    .demo-btn:active { transform: scale(0.92); }
+
+    @media (max-width: 430px) {
+      body { padding: 0; }
+      .phone { width: 100%; border-radius: 0; min-height: 100vh; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="phone">
+    <div class="chart-header">
+      <div class="chart-title-group">
+        <div class="chart-title" id="pageTitle">Top 5 Sales</div>
+        <div class="chart-subtitle" id="avgLabel">Avg: 14 units</div>
+      </div>
+
+      <div class="toggle-wrap" id="toggleWrap">
+        <div class="toggle-indicator" id="toggleIndicator"></div>
+        <button class="toggle-btn active" onclick="switchMode('sales')">Sales</button>
+        <button class="toggle-btn" onclick="switchMode('returns')">Returns</button>
+      </div>
+    </div>
+
+    <div class="product-list" id="productList"></div>
+  </div>
+
+  <div class="demo-controls">
+    <button class="demo-btn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+  </div>
+
+  <script>
+    const products = [
+      { name: "Omega-3 Ultra", sku: "SUP-OM3-UTA-180", sales: { units: 24, amount: 58400, display: "৳58.4K" }, returns: { units: 3, amount: 8950, display: "৳8.9K" } },
+      { name: "Magnesium Glycinate", sku: "SUP-MAG-GLY-120", sales: { units: 18, amount: 43200, display: "৳43.2K" }, returns: { units: 2, amount: 4800, display: "৳4.8K" } },
+      { name: "Betaine HCL & Pepsin", sku: "SUP-HCI-PEP-120", sales: { units: 12, amount: 28800, display: "৳28.8K" }, returns: { units: 5, amount: 12000, display: "৳12K" } },
+      { name: "Vitamin D3 + K2", sku: "SUP-VD3-K2-90", sales: { units: 9, amount: 21600, display: "৳21.6K" }, returns: { units: 1, amount: 2400, display: "৳2.4K" } },
+      { name: "Zinc Complex", sku: "SUP-ZNC-CMP-60", sales: { units: 6, amount: 14400, display: "৳14.4K" }, returns: { units: 4, amount: 9600, display: "৳9.6K" } }
+    ];
+
+    let currentMode = 'sales';
+
+    function getAvg(mode) {
+      return Math.round(products.reduce((sum, p) => sum + p[mode].units, 0) / products.length);
+    }
+
+    function render() {
+      const list = document.getElementById('productList');
+      const avg = getAvg(currentMode);
+      document.getElementById('avgLabel').textContent = `Avg: ${avg} units`;
+      document.getElementById('pageTitle').textContent = currentMode === 'sales' ? 'Top 5 Sales' : 'Top 5 Returns';
+
+      const sorted = [...products].sort((a, b) => b[currentMode].units - a[currentMode].units);
+      const maxUnits = Math.max(...sorted.map(p => p[currentMode].units), 1);
+      const scaleMax = Math.max(maxUnits * 1.12, 5);
+
+      list.innerHTML = sorted.map((p, i) => {
+        const data = p[currentMode];
+        const rank = i + 1;
+
+        return `
+          <div class="product-row" style="animation: fadeIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) ${i * 0.06}s both;">
+            <div class="product-top">
+              <span class="product-name">${p.name}</span>
+              <span class="product-units text-${rank}">${data.units} u</span>
+            </div>
+            <div class="product-bar-line">
+              <div class="product-dot sentiment-${rank}"></div>
+              <div class="product-bar-track">
+                <div class="product-bar-fill sentiment-${rank}" id="bar-${i}" style="width: 0%"></div>
+              </div>
+              <span class="product-price">${data.display}</span>
+            </div>
+            <div class="product-sku">${p.sku}</div>
+          </div>
+        `;
+      }).join('');
+
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          sorted.forEach((p, i) => {
+            const bar = document.getElementById(`bar-${i}`);
+            if (bar) bar.style.width = ((p[currentMode].units / scaleMax) * 100) + '%';
+          });
+        }, 80);
+      });
+    }
+
+    function switchMode(mode) {
+      if (mode === currentMode) return;
+      currentMode = mode;
+      document.querySelectorAll('.toggle-btn').forEach(btn => {
+        btn.classList.toggle('active', 
+          (mode === 'sales' && btn.textContent === 'Sales') ||
+          (mode === 'returns' && btn.textContent === 'Returns')
+        );
+      });
+      document.getElementById('toggleIndicator').style.transform = mode === 'sales' ? 'translateX(0)' : 'translateX(100%)';
+      document.getElementById('toggleWrap').classList.toggle('returns', mode === 'returns');
+      document.body.classList.toggle('mode-returns', mode === 'returns');
+      render();
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('dark');
+    }
+
+    const style = document.createElement('style');
+    style.textContent = `@keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }`;
+    document.head.appendChild(style);
+
+    render();
+  </script>
+</body>
+</html>

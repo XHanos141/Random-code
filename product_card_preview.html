@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Product Card Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Courier+Prime:wght@400;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+
+:root{
+  --bg-body:#e8e9ee;
+  --bg-phone:#f4f5f9;
+  --bg-card:#fff;
+  --border-card:#ececec;
+  --text-title:#001f3c;
+  --text-label:#b0b1a5;
+  --text-val:#001f3c;
+  --bg-expiry:#f0f1f5;
+  --bg-expiry-depth: linear-gradient(180deg, rgba(0,0,0,0.03) 0%, rgba(0,0,0,0.01) 40%, transparent 100%);
+  --bg-avatar-g:#e8f8ee;
+  --bg-avatar-p:#f0eeff;
+  --bg-avatar-r:#fff0f0;
+  --shadow-card:0 8px 24px rgba(0,0,0,0.08);
+  --toggle-bg:#ddd;
+  --toggle-knob:#fff;
+  --badge-glass-bg: linear-gradient(135deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.2) 100%);
+  --badge-glass-border-top: rgba(255,255,255,0.7);
+  --badge-glass-border-left: rgba(255,255,255,0.5);
+  --badge-glass-border-right: rgba(0,0,0,0.06);
+  --badge-glass-border-bottom: rgba(0,0,0,0.1);
+  --badge-shimmer: rgba(255,255,255,0.7);
+  --badge-inset: rgba(255,255,255,0.5);
+  --cal-header:#e05252;
+  --cal-body-fill:#e0f2fe;
+  --cal-body-stroke:#475569;
+  --cal-hooks:#7C6FF7;
+  --cal-num:#2a9d5c;
+  --card-hover-shadow: 0 12px 32px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.08);
+}
+
+body.dark-mode{
+  --bg-body:#0f1117;
+  --bg-phone:#1a1d26;
+  --bg-card:#232736;
+  --border-card:#2d3142;
+  --text-title:#e8eaf0;
+  --text-label:#6b6f82;
+  --text-val:#e8eaf0;
+  --bg-expiry:#181b26;
+  --bg-expiry-depth: linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.1) 40%, transparent 100%);
+  --bg-avatar-g:rgba(42,157,92,0.15);
+  --bg-avatar-p:rgba(124,111,247,0.15);
+  --bg-avatar-r:rgba(224,82,82,0.15);
+  --shadow-card:0 8px 24px rgba(0,0,0,0.35);
+  --toggle-bg:#3a3f52;
+  --toggle-knob:#7C6FF7;
+  --badge-glass-bg: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+  --badge-glass-border-top: rgba(255,255,255,0.12);
+  --badge-glass-border-left: rgba(255,255,255,0.06);
+  --badge-glass-border-right: rgba(0,0,0,0.3);
+  --badge-glass-border-bottom: rgba(0,0,0,0.4);
+  --badge-shimmer: rgba(255,255,255,0.15);
+  --badge-inset: rgba(255,255,255,0.08);
+  --cal-header:#c94a4a;
+  --cal-body-fill:#1e3a4a;
+  --cal-body-stroke:#5a6a7a;
+  --cal-hooks:#7C6FF7;
+  --cal-num:#3dbd6e;
+  --card-hover-shadow: 0 12px 32px rgba(249,115,22,0.15), 0 4px 16px rgba(249,115,22,0.08), 0 0 0 1px rgba(249,115,22,0.1);
+}
+
+body{
+  background:var(--bg-body);
+  font-family:'DM Sans',sans-serif;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+  padding:20px;
+  transition: background 0.4s ease;
+}
+
+.phone{
+  width:360px;
+  background:var(--bg-phone);
+  border-radius:40px;
+  overflow:hidden;
+  flex-shrink:0;
+  box-shadow:0 20px 60px rgba(0,0,0,0.18);
+  position:relative;
+  transition: background 0.4s ease;
+}
+
+.mood-toggle{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:10px;
+  padding:16px 14px 0;
+}
+.mood-label{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:11px;
+  font-weight:600;
+  color:var(--text-label);
+  transition: color 0.4s ease;
+}
+.toggle-track{
+  width:52px;
+  height:28px;
+  border-radius:14px;
+  background:var(--toggle-bg);
+  position:relative;
+  cursor:pointer;
+  transition: background 0.3s ease;
+  display:flex;
+  align-items:center;
+  padding:0 3px;
+}
+.toggle-knob{
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  background:var(--toggle-knob);
+  position:absolute;
+  left:3px;
+  transition: left 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 2px 6px rgba(0,0,0,0.2);
+}
+.toggle-knob svg{
+  width:12px;
+  height:12px;
+}
+body.dark-mode .toggle-knob{
+  left:27px;
+  box-shadow:0 2px 8px rgba(124,111,247,0.4);
+}
+
+.content{
+  padding:14px 14px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.prod-card{
+  background:var(--bg-card);
+  border-radius:16px;
+  padding:12px;
+  border:1px solid var(--border-card);
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.4s ease, border-color 0.4s ease;
+}
+.prod-card:hover{
+  transform: translateY(-2px);
+  box-shadow: var(--card-hover-shadow);
+}
+.prod-card-top{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.prod-avatar{
+  width:36px;
+  height:36px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+}
+.prod-avatar.p{background:var(--bg-avatar-p);}
+.prod-avatar.g{background:var(--bg-avatar-g);}
+.prod-avatar.r{background:var(--bg-avatar-r);}
+.prod-card-info{flex:1;}
+.prod-card-name{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:12px;
+  font-weight:700;
+  color:var(--text-title);
+  transition: color 0.4s ease;
+}
+.prod-card-sku{
+  font-family:'Courier Prime',monospace;
+  font-size:9px;
+  color:#00d4ff;
+  margin-top:1px;
+  font-weight:400;
+  letter-spacing:0.13em;
+}
+
+.stock-badge{
+  padding:5px 12px;
+  border-radius:8px;
+  font-size:13px;
+  font-weight:800;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  min-width:28px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+  background: var(--badge-glass-bg);
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  border-top: 1px solid var(--badge-glass-border-top);
+  border-left: 1px solid var(--badge-glass-border-left);
+  border-right: 1px solid var(--badge-glass-border-right);
+  border-bottom: 1px solid var(--badge-glass-border-bottom);
+  box-shadow: 
+    inset 0 1px 1px var(--badge-inset),
+    0 2px 4px rgba(0,0,0,0.06),
+    0 4px 8px rgba(0,0,0,0.08),
+    0 8px 16px rgba(0,0,0,0.08),
+    0 12px 24px rgba(0,0,0,0.06);
+}
+.stock-badge::after{
+  content:'';
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:40%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.35) 0%, transparent 100%);
+  border-radius:8px 8px 0 0;
+  pointer-events:none;
+}
+body.dark-mode .stock-badge::after{
+  background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 100%);
+}
+.stock-badge::before{
+  content:'';
+  position:absolute;
+  top:0;
+  left:-100%;
+  width:100%;
+  height:100%;
+  background: linear-gradient(90deg, transparent 0%, var(--badge-shimmer) 40%, var(--badge-shimmer) 60%, transparent 100%);
+  animation: flowShimmer 2.5s infinite;
+  z-index:2;
+}
+@keyframes flowShimmer{
+  0%{left:-120%;}
+  100%{left:120%;}
+}
+.stock-badge.out{
+  background: linear-gradient(135deg, rgba(224,82,82,0.15) 0%, rgba(224,82,82,0.05) 100%);
+  color:#e05252;
+}
+.stock-badge.low{
+  background: linear-gradient(135deg, rgba(235,150,8,0.15) 0%, rgba(235,150,8,0.05) 100%);
+  color:#eb9608;
+}
+.stock-badge.suf{
+  background: linear-gradient(135deg, rgba(42,157,92,0.15) 0%, rgba(42,157,92,0.05) 100%);
+  color:#2a9d5c;
+}
+
+.prod-stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:0;
+  border-top:1px solid var(--border-card);
+  padding-top:8px;
+  transition: border-color 0.4s ease;
+}
+.prod-stat{
+  text-align:center;
+  padding:0 4px;
+}
+.prod-stat:not(:last-child){
+  border-right:1px solid var(--border-card);
+  transition: border-color 0.4s ease;
+}
+.prod-stat-label{
+  font-size:8px;
+  color:var(--text-label);
+  font-weight:600;
+  letter-spacing:0.5px;
+  text-transform:uppercase;
+  margin-bottom:3px;
+  transition: color 0.4s ease;
+}
+.prod-stat-val{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:13px;
+  font-weight:700;
+  color:var(--text-val);
+  transition: color 0.4s ease;
+}
+.prod-stat-val.green{color:#2a9d5c;}
+.prod-stat-val.red{color:#e05252;}
+.prod-stat-val.amber{color:#eb9608;}
+.prod-stat-val.purple{color:#7C6FF7;}
+
+/* ════════════════════════════════════════
+   EXPIRY BAR — depth, darker, finished
+   ════════════════════════════════════════ */
+.expiry-bar{
+  background:var(--bg-expiry);
+  border-radius:8px;
+  padding:6px 8px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  transition: background 0.4s ease;
+  position:relative;
+  overflow:hidden;
+  /* Inner depth shadow — recessed feel, lighter on top */
+  box-shadow:
+    inset 0 1px 2px rgba(0,0,0,0.04),
+    inset 0 -1px 2px rgba(0,0,0,0.03);
+}
+/* Top subtle highlight for 3D edge */
+.expiry-bar::before{
+  content:'';
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:1px;
+  background: linear-gradient(90deg, transparent 5%, rgba(255,255,255,0.4) 50%, transparent 95%);
+  pointer-events:none;
+}
+body.dark-mode .expiry-bar::before{
+  background: linear-gradient(90deg, transparent 5%, rgba(255,255,255,0.06) 50%, transparent 95%);
+}
+/* Depth gradient overlay */
+.expiry-bar::after{
+  content:'';
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  background: var(--bg-expiry-depth);
+  pointer-events:none;
+  border-radius:8px;
+}
+.expiry-label{
+  font-size:9px;
+  color:var(--text-label);
+  font-weight:600;
+  display:flex;
+  align-items:center;
+  gap:5px;
+  transition: color 0.4s ease;
+  position:relative;
+  z-index:1;
+}
+.expiry-val{
+  font-family:'Courier Prime',monospace;
+  font-size:10px;
+  color:var(--text-val);
+  font-weight:700;
+  transition: color 0.4s ease;
+  position:relative;
+  z-index:1;
+}
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <div class="mood-toggle">
+    <span class="mood-label">Light</span>
+    <div class="toggle-track" id="themeToggle">
+      <div class="toggle-knob" id="toggleKnob">
+        <svg id="iconSun" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+        </svg>
+        <svg id="iconMoon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+          <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+        </svg>
+      </div>
+    </div>
+    <span class="mood-label">Dark</span>
+  </div>
+
+  <div class="content">
+
+    <!-- Omega-3 — LOW stock (4 units) — GREEN capsule -->
+    <div class="prod-card">
+      <div class="prod-card-top">
+        <div class="prod-avatar g">
+          <svg width="30" height="30" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g transform="rotate(45 18 18)">
+              <rect x="5" y="13" width="26" height="10" rx="5" fill="none" stroke="#2a9d5c" stroke-width="2.6"/>
+              <path d="M10 13.5C7.5 13.5 5.5 15.2 5.5 18C5.5 20.8 7.5 22.5 10 22.5H18V13.5H10Z" fill="#2a9d5c" opacity="0.4"/>
+              <path d="M18 13.5H26C28.5 13.5 30.5 15.2 30.5 18C30.5 20.8 28.5 22.5 26 22.5H18V13.5Z" fill="#2a9d5c" opacity="0.8"/>
+              <path d="M18 13.5V22.5" stroke="#2a9d5c" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M8 17.5C8 17.5 10.5 16 13.5 16" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity="0.55"/>
+              <circle cx="26" cy="18" r="1.4" fill="#fff" opacity="0.75"/>
+            </g>
+          </svg>
+        </div>
+        <div class="prod-card-info">
+          <div class="prod-card-name">Omega-3 Ultra</div>
+          <div class="prod-card-sku">NW-OMG3-UTA-180</div>
+        </div>
+        <div class="stock-badge low">4</div>
+      </div>
+      <div class="prod-stats">
+        <div class="prod-stat">
+          <div class="prod-stat-label">Buying Price</div>
+          <div class="prod-stat-val">৳4,200</div>
+        </div>
+        <div class="prod-stat">
+          <div class="prod-stat-label">Price</div>
+          <div class="prod-stat-val purple">৳5,950</div>
+        </div>
+        <div class="prod-stat">
+          <div class="prod-stat-label">Margin</div>
+          <div class="prod-stat-val green">29.1%</div>
+        </div>
+      </div>
+      <div class="expiry-bar">
+        <div class="expiry-label">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="var(--cal-body-stroke)" stroke-width="1.2" fill="none"/>
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" fill="var(--cal-body-fill)" opacity="0.4"/>
+            <rect x="3" y="4" width="18" height="6" rx="2" fill="var(--cal-header)" opacity="0.9"/>
+            <line x1="3" y1="10" x2="21" y2="10" stroke="var(--cal-body-stroke)" stroke-width="1"/>
+            <line x1="8" y1="2" x2="8" y2="6" stroke="var(--cal-hooks)" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="16" y1="2" x2="16" y2="6" stroke="var(--cal-hooks)" stroke-width="1.5" stroke-linecap="round"/>
+            <text x="12" y="17.5" text-anchor="middle" fill="var(--cal-num)" font-size="7" font-family="Plus Jakarta Sans" font-weight="800">23</text>
+          </svg>
+          Expiry Date
+        </div>
+        <div class="expiry-val">Sep 2029</div>
+      </div>
+    </div>
+
+    <!-- Magnesium — SUFFICIENT stock (6 units) — PURPLE capsule -->
+    <div class="prod-card">
+      <div class="prod-card-top">
+        <div class="prod-avatar p">
+          <svg width="30" height="30" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g transform="rotate(45 18 18)">
+              <rect x="5" y="13" width="26" height="10" rx="5" fill="none" stroke="#7C6FF7" stroke-width="2.6"/>
+              <path d="M10 13.5C7.5 13.5 5.5 15.2 5.5 18C5.5 20.8 7.5 22.5 10 22.5H18V13.5H10Z" fill="#7C6FF7" opacity="0.4"/>
+              <path d="M18 13.5H26C28.5 13.5 30.5 15.2 30.5 18C30.5 20.8 28.5 22.5 26 22.5H18V13.5Z" fill="#7C6FF7" opacity="0.8"/>
+              <path d="M18 13.5V22.5" stroke="#7C6FF7" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M8 17.5C8 17.5 10.5 16 13.5 16" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity="0.55"/>
+              <circle cx="26" cy="18" r="1.4" fill="#fff" opacity="0.75"/>
+            </g>
+          </svg>
+        </div>
+        <div class="prod-card-info">
+          <div class="prod-card-name">Magnesium Glycinate</div>
+          <div class="prod-card-sku">DB-MAG-GLY-120</div>
+        </div>
+        <div class="stock-badge suf">6</div>
+      </div>
+      <div class="prod-stats">
+        <div class="prod-stat">
+          <div class="prod-stat-label">Buying Price</div>
+          <div class="prod-stat-val">৳1,690</div>
+        </div>
+        <div class="prod-stat">
+          <div class="prod-stat-label">Price</div>
+          <div class="prod-stat-val purple">৳3,250</div>
+        </div>
+        <div class="prod-stat">
+          <div class="prod-stat-label">Margin</div>
+          <div class="prod-stat-val green">48.0%</div>
+        </div>
+      </div>
+      <div class="expiry-bar">
+        <div class="expiry-label">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="var(--cal-body-stroke)" stroke-width="1.2" fill="none"/>
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" fill="var(--cal-body-fill)" opacity="0.4"/>
+            <rect x="3" y="4" width="18" height="6" rx="2" fill="var(--cal-header)" opacity="0.9"/>
+            <line x1="3" y1="10" x2="21" y2="10" stroke="var(--cal-body-stroke)" stroke-width="1"/>
+            <line x1="8" y1="2" x2="8" y2="6" stroke="var(--cal-hooks)" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="16" y1="2" x2="16" y2="6" stroke="var(--cal-hooks)" stroke-width="1.5" stroke-linecap="round"/>
+            <text x="12" y="17.5" text-anchor="middle" fill="var(--cal-num)" font-size="7" font-family="Plus Jakarta Sans" font-weight="800">23</text>
+          </svg>
+          Expiry Date
+        </div>
+        <div class="expiry-val">May 2028</div>
+      </div>
+    </div>
+
+    <!-- Betaine 120 — OUT of stock (0 units) — RED capsule -->
+    <div class="prod-card">
+      <div class="prod-card-top">
+        <div class="prod-avatar r">
+          <svg width="30" height="30" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g transform="rotate(45 18 18)">
+              <rect x="5" y="13" width="26" height="10" rx="5" fill="none" stroke="#e05252" stroke-width="2.6"/>
+              <path d="M10 13.5C7.5 13.5 5.5 15.2 5.5 18C5.5 20.8 7.5 22.5 10 22.5H18V13.5H10Z" fill="#e05252" opacity="0.4"/>
+              <path d="M18 13.5H26C28.5 13.5 30.5 15.2 30.5 18C30.5 20.8 28.5 22.5 26 22.5H18V13.5Z" fill="#e05252" opacity="0.8"/>
+              <path d="M18 13.5V22.5" stroke="#e05252" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M8 17.5C8 17.5 10.5 16 13.5 16" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity="0.55"/>
+              <circle cx="26" cy="18" r="1.4" fill="#fff" opacity="0.75"/>
+            </g>
+          </svg>
+        </div>
+        <div class="prod-card-info">
+          <div class="prod-card-name">Betaine HCL & Pepsin</div>
+          <div class="prod-card-sku">DB-HCI-PEP-120</div>
+        </div>
+        <div class="stock-badge out">0</div>
+      </div>
+      <div class="prod-stats">
+        <div class="prod-stat">
+          <div class="prod-stat-label">Buying Price</div>
+          <div class="prod-stat-val">৳1,950</div>
+        </div>
+        <div class="prod-stat">
+          <div class="prod-stat-label">Price</div>
+          <div class="prod-stat-val purple">৳3,000</div>
+        </div>
+        <div class="prod-stat">
+          <div class="prod-stat-label">Margin</div>
+          <div class="prod-stat-val green">35.0%</div>
+        </div>
+      </div>
+      <div class="expiry-bar">
+        <div class="expiry-label">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="var(--cal-body-stroke)" stroke-width="1.2" fill="none"/>
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" fill="var(--cal-body-fill)" opacity="0.4"/>
+            <rect x="3" y="4" width="18" height="6" rx="2" fill="var(--cal-header)" opacity="0.9"/>
+            <line x1="3" y1="10" x2="21" y2="10" stroke="var(--cal-body-stroke)" stroke-width="1"/>
+            <line x1="8" y1="2" x2="8" y2="6" stroke="var(--cal-hooks)" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="16" y1="2" x2="16" y2="6" stroke="var(--cal-hooks)" stroke-width="1.5" stroke-linecap="round"/>
+            <text x="12" y="17.5" text-anchor="middle" fill="var(--cal-num)" font-size="7" font-family="Plus Jakarta Sans" font-weight="800">23</text>
+          </svg>
+          Expiry Date
+        </div>
+        <div class="expiry-val">Sep 2027</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  (function(){
+    const toggleTrack = document.getElementById('themeToggle');
+    const iconSun = document.getElementById('iconSun');
+    const iconMoon = document.getElementById('iconMoon');
+    let isDark = false;
+
+    toggleTrack.addEventListener('click', function(){
+      isDark = !isDark;
+      if(isDark){
+        document.body.classList.add('dark-mode');
+        iconSun.style.display = 'none';
+        iconMoon.style.display = 'block';
+      } else {
+        document.body.classList.remove('dark-mode');
+        iconSun.style.display = 'block';
+        iconMoon.style.display = 'none';
+      }
+    });
+  })();
+</script>
+
+</body>
+</html>

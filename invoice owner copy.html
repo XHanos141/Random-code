@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SuppVerse BD — Invoice (Mission Control)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { 
+  font-family: "DM Sans", sans-serif; 
+  background: #f4f5f9; 
+  padding: 20px;
+  color: #001f3c;
+}
+
+.mission-control {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+
+/* ===== HEADER ===== */
+.mc-header {
+  background: #001f3c;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mc-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mc-brand svg {
+  width: 26px;
+  height: 26px;
+}
+
+.mc-brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.mc-brand-name {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+}
+
+.mc-brand-bd {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  color: #7c6ff7;
+  letter-spacing: 0.18em;
+}
+
+.mc-confidential {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 7px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 0.05em;
+  text-align: right;
+}
+
+/* ===== INVOICE STRIP ===== */
+.mc-invoice-strip {
+  text-align: center;
+  padding: 3px 18px 2px;
+  background: #fff;
+}
+
+.mc-invoice-text {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 8px;
+  font-weight: 800;
+  color: #6b7280;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.08);
+}
+
+/* ===== META BAR ===== */
+.mc-meta-bar {
+  background: #f8f9fb;
+  padding: 6px 18px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid #ececec;
+}
+
+.mc-meta-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+}
+
+.mc-meta-headline {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 7px;
+  font-weight: 800;
+  color: #8c92a1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 1px;
+}
+
+.mc-meta-value {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: #001f3c;
+  line-height: 1.3;
+}
+
+.mc-meta-value-sm {
+  font-family: "DM Sans", sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  color: #001f3c;
+  line-height: 1.3;
+}
+
+.mc-meta-phone {
+  font-family: "DM Sans", sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  color: #001f3c;
+  line-height: 1.3;
+}
+
+.mc-order-id {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border: 1.5px solid rgba(124,111,247,0.55);
+  border-radius: 6px;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  color: #7c6ff7;
+  letter-spacing: 0.04em;
+  width: fit-content;
+  background: rgba(124,111,247,0.06);
+}
+
+.mc-meta-right {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.mc-meta-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+}
+
+.mc-meta-label {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 7px;
+  font-weight: 700;
+  color: #8c92a1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.mc-meta-value.purple { color: #7c6ff7; }
+.mc-meta-value.teal { color: #0891b2; }
+
+.mc-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  align-self: flex-end;
+  margin-top: 1px;
+}
+
+.mc-status-paid {
+  background: #d4edda;
+  border: 1.5px solid #1e7e4a;
+  color: #1e7e4a;
+}
+
+.mc-status-icon {
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+}
+
+/* ===== TABLE ===== */
+.mc-table-header {
+  display: grid;
+  grid-template-columns: 18px 1fr 36px 60px 50px 46px;
+  gap: 4px;
+  padding: 6px 18px;
+  background: rgba(124,111,247,0.06);
+  border-bottom: 1px solid #ececec;
+}
+
+.mc-th {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 7px;
+  font-weight: 700;
+  color: #7c6ff7;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mc-th-right { text-align: right; }
+.mc-th-center { text-align: center; }
+
+.mc-th-cost-sell {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: right;
+}
+.mc-th-cost-sell .cost-label { color: #D4A437; }
+.mc-th-cost-sell .slash-label { color: #8c92a1; margin: 0 1px; }
+.mc-th-cost-sell .sell-label { color: #001F3C; }
+
+.mc-table-row {
+  display: grid;
+  grid-template-columns: 18px 1fr 36px 60px 50px 46px;
+  gap: 4px;
+  padding: 6px 18px;
+  border-bottom: 0.5px dashed #d1d5db;
+  align-items: center;
+}
+
+.mc-table-row:nth-child(even) { background: rgba(0,31,60,0.015); }
+
+/* ===== TOTALS ROW ===== */
+.mc-table-totals {
+  display: grid;
+  grid-template-columns: 18px 1fr 36px 60px 50px 46px;
+  gap: 4px;
+  padding: 10px 18px;
+  background: rgba(0,31,60,0.04);
+  border-top: 1px solid #001f3c;
+  border-bottom: 1px solid #001f3c;
+  align-items: center;
+}
+
+.mc-total-label {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  color: #001f3c;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.mc-total-qty {
+  font-family: "DM Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #001f3c;
+  text-align: center;
+}
+
+.mc-total-cost-sell {
+  font-family: "DM Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: right;
+  line-height: 1.5;
+}
+
+.mc-total-cost-sell .mc-cost-price { color: #D4A437; }
+.mc-total-cost-sell .mc-sell-price { color: #001F3C; }
+
+.mc-total-profit {
+  font-family: "DM Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #2f9b68;
+  text-align: right;
+}
+
+.mc-total-margin {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  text-align: right;
+  padding: 3px 8px;
+  border-radius: 999px;
+  width: fit-content;
+  justify-self: end;
+  border: 1px solid;
+  margin-right: -4px;
+}
+
+.mc-total-margin.good { color: #2f9b68; background: rgba(47,155,104,0.08); border-color: #2f9b68; }
+.mc-total-margin.warn { color: #d48c0a; background: rgba(244,169,34,0.08); border-color: #d48c0a; }
+.mc-total-margin.bad { color: #d95353; background: rgba(217,83,83,0.08); border-color: #d95353; }
+
+.mc-td-num {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  color: #7c6ff7;
+  text-align: center;
+}
+
+.mc-td-name {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 9px;
+  font-weight: 600;
+  color: #001f3c;
+  line-height: 1.3;
+}
+
+.mc-td-sku {
+  font-family: "Courier Prime", monospace;
+  font-size: 7px;
+  font-weight: 700;
+  color: #0891b2;
+  letter-spacing: 0.13em;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mc-td-qty {
+  font-family: "DM Sans", sans-serif;
+  font-size: 9px;
+  font-weight: 600;
+  color: #001f3c;
+  text-align: center;
+}
+
+.mc-td-price {
+  font-family: "DM Sans", sans-serif;
+  font-size: 9px;
+  font-weight: 600;
+  text-align: right;
+  line-height: 1.5;
+}
+
+.mc-cost-price { color: #D4A437; }
+.mc-sell-price { color: #001F3C; }
+
+.mc-td-profit {
+  font-family: "DM Sans", sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  color: #2f9b68;
+  text-align: right;
+}
+
+.mc-td-margin {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  text-align: right;
+  padding: 2px 6px;
+  border-radius: 999px;
+  width: fit-content;
+  justify-self: end;
+  border: 1px solid;
+}
+
+.mc-margin-good { color: #2f9b68; background: rgba(47,155,104,0.08); border-color: #2f9b68; }
+.mc-margin-warn { color: #d48c0a; background: rgba(244,169,34,0.08); border-color: #d48c0a; }
+.mc-margin-bad { color: #d95353; background: rgba(217,83,83,0.08); border-color: #d95353; }
+
+/* ===== SUMMARY ===== */
+.mc-summary {
+  padding: 12px 18px;
+  background: #f8f9fb;
+}
+
+.mc-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.mc-summary-left, .mc-summary-right {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.mc-sum-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+}
+
+.mc-sum-label { color: #8c92a1; font-weight: 500; }
+.mc-sum-value { color: #001f3c; font-weight: 600; }
+.mc-sum-value.red { color: #d95353; font-weight: 700; }
+
+.mc-grand-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 8px;
+  border-top: 1.5px solid #ececec;
+}
+
+.mc-grand-label {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  color: #8c92a1;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.mc-grand-value {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: #001f3c;
+}
+
+.mc-margin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #7C6FF7, #4535c4);
+  color: #fff;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 6px 14px;
+  border-radius: 999px;
+  margin-top: 8px;
+  float: right;
+}
+
+/* ===== FOOTER ===== */
+.mc-footer {
+  padding: 14px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #ececec;
+}
+
+.mc-qr {
+  width: 32px;
+  height: 32px;
+  background: #f4f5f9;
+  border: 1px solid #ececec;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mc-qr svg { width: 16px; height: 16px; color: #8c92a1; }
+
+.mc-qr-caption {
+  font-size: 6px;
+  color: #c5c9d4;
+  margin-top: 2px;
+}
+
+.mc-watermark {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 7px;
+  font-weight: 700;
+  color: rgba(217,83,83,0.3);
+  letter-spacing: 0.05em;
+}
+
+</style>
+<base target="_blank">
+</head>
+<body>
+
+<div class="mission-control">
+  <!-- ===== HEADER ===== -->
+  <div class="mc-header">
+    <div class="mc-brand">
+      <svg viewBox="0 0 200 200" width="26" height="26">
+        <defs>
+          <linearGradient id="ringRed" x1="28" y1="170" x2="150" y2="35">
+            <stop stop-color="#9f1f2b"/><stop offset="0.55" stop-color="#b82836"/><stop offset="1" stop-color="#c43a42"/>
+          </linearGradient>
+          <linearGradient id="pillOrange" x1="108" y1="62" x2="160" y2="111">
+            <stop stop-color="#ff9b31"/><stop offset="1" stop-color="#ee842f"/>
+          </linearGradient>
+        </defs>
+        <path d="M111 36 A65 65 0 1 0 164 89" fill="none" stroke="url(#ringRed)" stroke-width="26" stroke-linecap="round"/>
+        <g transform="translate(122 78) rotate(45)">
+          <path d="M-22 -3 L-22 -35 A22 22 0 0 1 22 -35 L22 -3 Z" fill="url(#pillOrange)"/>
+        </g>
+      </svg>
+      <div class="mc-brand-text">
+        <div class="mc-brand-name">SuppVerse</div>
+        <div class="mc-brand-bd">BD</div>
+      </div>
+    </div>
+    <div class="mc-confidential">INTERNAL —<br>CONFIDENTIAL</div>
+  </div>
+
+  <!-- ===== INVOICE STRIP ===== -->
+  <div class="mc-invoice-strip">
+    <div class="mc-invoice-text">Invoice</div>
+  </div>
+
+  <!-- ===== META BAR ===== -->
+  <div class="mc-meta-bar">
+    <div class="mc-meta-left">
+      <div class="mc-meta-headline">Customer Info</div>
+      <div class="mc-meta-value">Hasan</div>
+      <div class="mc-meta-value-sm">Dhaka, Bangladesh</div>
+      <div class="mc-meta-phone">+880 1712-345678</div>
+      <div class="mc-order-id">SV-1011</div>
+    </div>
+    <div class="mc-meta-right">
+      <div class="mc-meta-row">
+        <div class="mc-meta-label">Date</div>
+        <div class="mc-meta-value">25 Apr 2026</div>
+      </div>
+      <div class="mc-meta-row">
+        <div class="mc-meta-label">Exchange</div>
+        <div class="mc-meta-value teal">130 BDT/USD</div>
+      </div>
+      <div class="mc-status-pill mc-status-paid">
+        <svg class="mc-status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        <span>Paid</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="mc-table-header">
+    <div class="mc-th mc-th-center">#</div>
+    <div class="mc-th">Item / SKU</div>
+    <div class="mc-th mc-th-center">Qty</div>
+    <div class="mc-th-cost-sell">
+      <span class="cost-label">Cost</span><span class="slash-label">/</span><span class="sell-label">Sell</span>
+    </div>
+    <div class="mc-th mc-th-right">Profit</div>
+    <div class="mc-th mc-th-right">Margin</div>
+  </div>
+
+  <div class="mc-table-row">
+    <div class="mc-td-num">1</div>
+    <div class="mc-td-name">
+      Omega-3 Ultra
+      <div class="mc-td-sku">NW-OMG3-UTA-180</div>
+    </div>
+    <div class="mc-td-qty">2u</div>
+    <div class="mc-td-price">
+      <span class="mc-cost-price">৳3,118</span><br><span class="mc-sell-price">৳23,800</span>
+    </div>
+    <div class="mc-td-profit">৳20,682</div>
+    <div class="mc-td-margin mc-margin-good">87%</div>
+  </div>
+
+  <div class="mc-table-row">
+    <div class="mc-td-num">2</div>
+    <div class="mc-td-name">
+      Magnesium Glycinate
+      <div class="mc-td-sku">DB-MAG-GLY-120</div>
+    </div>
+    <div class="mc-td-qty">1u</div>
+    <div class="mc-td-price">
+      <span class="mc-cost-price">৳1,625</span><br><span class="mc-sell-price">৳3,250</span>
+    </div>
+    <div class="mc-td-profit">৳1,625</div>
+    <div class="mc-td-margin mc-margin-good">50%</div>
+  </div>
+
+  <div class="mc-table-row">
+    <div class="mc-td-num">3</div>
+    <div class="mc-td-name">
+      Betaine HCL & Pepsin
+      <div class="mc-td-sku">DB-HCI-PEP-120</div>
+    </div>
+    <div class="mc-td-qty">3u</div>
+    <div class="mc-td-price">
+      <span class="mc-cost-price">৳2,700</span><br><span class="mc-sell-price">৳9,000</span>
+    </div>
+    <div class="mc-td-profit">৳6,300</div>
+    <div class="mc-td-margin mc-margin-good">70%</div>
+  </div>
+
+  <!-- Totals Row -->
+  <div class="mc-table-totals">
+    <div class="mc-total-label">Totals</div>
+    <div></div>
+    <div class="mc-total-qty">6u</div>
+    <div class="mc-total-cost-sell">
+      <span class="mc-cost-price">৳7,443</span><br><span class="mc-sell-price">৳36,050</span>
+    </div>
+    <div class="mc-total-profit">৳28,607</div>
+    <div class="mc-total-margin good">79%</div>
+  </div>
+
+  <!-- Summary -->
+  <div class="mc-summary">
+    <div class="mc-summary-grid">
+      <div class="mc-summary-left">
+        <div class="mc-sum-row"><span class="mc-sum-label">Items</span><span class="mc-sum-value">3 items · 6 units</span></div>
+        <div class="mc-sum-row"><span class="mc-sum-label">Total Cost (USD)</span><span class="mc-sum-value">$57.25</span></div>
+        <div class="mc-sum-row"><span class="mc-sum-label">Shipping/Duty</span><span class="mc-sum-value">৳0</span></div>
+      </div>
+      <div class="mc-summary-right">
+        <div class="mc-sum-row"><span class="mc-sum-label">Subtotal</span><span class="mc-sum-value">৳36,050</span></div>
+        <div class="mc-sum-row"><span class="mc-sum-label">Discount</span><span class="mc-sum-value red">-৳500</span></div>
+        <div class="mc-sum-row"><span class="mc-sum-label">Grand Total</span><span class="mc-sum-value" style="font-size:12px;font-weight:800;">৳35,550</span></div>
+      </div>
+    </div>
+    <div style="clear:both;"></div>
+    <div class="mc-margin-badge">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      BLENDED MARGIN 79.4%
+    </div>
+    <div style="clear:both;"></div>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <div class="mc-footer">
+    <div>
+      <div class="mc-qr">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="7" y1="3" x2="7" y2="21"></line><line x1="17" y1="3" x2="17" y2="21"></line><line x1="3" y1="7" x2="21" y2="7"></line><line x1="3" y1="17" x2="21" y2="17"></line></svg>
+      </div>
+      <div class="mc-qr-caption">Scan to verify</div>
+    </div>
+    <div class="mc-watermark">INTERNAL USE ONLY — DO NOT SHARE</div>
+  </div>
+</div>
+
+</body>
+</html>

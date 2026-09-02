@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SuppVerse BD — Customer Invoice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700;800&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { 
+  font-family: "DM Sans", sans-serif; 
+  background: #f4f5f9; 
+  padding: 20px;
+  color: #001f3c;
+}
+
+.receipt {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  padding: 20px 18px;
+  position: relative;
+}
+
+/* ===== WAVE HEADER — COMPACT, WAVES CONTAINED HERE ONLY ===== */
+.wave-header {
+  position: relative;
+  margin: -20px -18px 10px -18px;
+  padding: 14px 18px 8px 18px;
+  overflow: hidden;
+  border-radius: 14px 14px 0 0;
+  min-height: 58px;
+}
+
+.wave-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+}
+
+.wave-bg svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.receipt-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.header-logo svg {
+  width: 26px;
+  height: 26px;
+}
+
+.header-brand {
+  display: flex;
+  flex-direction: column;
+}
+
+.header-name {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: #001f3c;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+}
+
+.header-bd {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  color: #7c6ff7;
+  letter-spacing: 0.18em;
+}
+
+.header-line {
+  width: 100%;
+  height: 1px;
+  background: #001f3c;
+  margin-bottom: 8px;
+  position: relative;
+  z-index: 1;
+  opacity: 0.15;
+}
+
+.invoice-label {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 9px;
+  font-weight: 800;
+  color: #001f3c;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 4px rgba(0,31,60,0.18);
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== META — SEPARATE SECTION BELOW HEADER ===== */
+.receipt-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed #d1d5db;
+  position: relative;
+  z-index: 1;
+}
+
+.meta-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.meta-label {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 7px;
+  font-weight: 700;
+  color: #8c92a1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.meta-value {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #001f3c;
+}
+
+.meta-value-sm,
+.meta-phone {
+  font-size: 9px;
+  font-weight: 700;
+  color: #001f3c;
+}
+
+.meta-right {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.meta-order {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #7c6ff7;
+}
+
+.meta-date {
+  font-size: 9px;
+  color: #8c92a1;
+}
+
+/* ===== STATUS PILL ===== */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+  padding: 2px 11px;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  align-self: flex-end;
+  transition: all 0.2s ease;
+}
+
+.status-pill .status-icon {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+.status-paid {
+  background: #d4edda;
+  border: 1.5px solid #1e7e4a;
+  color: #1e7e4a;
+}
+
+.status-pending {
+  background: #fef9e8;
+  border: 1.5px solid #d97706;
+  color: #b45309;
+}
+
+.status-returned {
+  background: #fef2f2;
+  border: 1.5px solid #dc2626;
+  color: #b91c1c;
+}
+
+/* ===== ITEMS ===== */
+.item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid #d1d5db;
+  position: relative;
+  z-index: 1;
+}
+
+.item-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.item-name {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #001f3c;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+.item-unit {
+  font-family: "Courier Prime", monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: #6b7280;
+  margin-top: 4px;
+  letter-spacing: 0.02em;
+  opacity: 0.75;
+}
+
+.item-unit .unit-qty { color: #4b5563; }
+.item-unit .unit-sep { color: #9ca3af; margin: 0 2px; }
+.item-unit .unit-price { color: #4b5563; }
+
+.item-right {
+  flex-shrink: 0;
+  margin-left: 10px;
+}
+
+.item-total {
+  font-family: "Courier Prime", monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: #001f3c;
+}
+
+/* ===== DISCOUNT ROW ===== */
+.discount-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1.5px dashed #001f3c;
+  position: relative;
+  z-index: 1;
+}
+
+.discount-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #e8f5ee;
+  border: 1px solid #2f9b68;
+  border-radius: 6px;
+  padding: 3px 8px;
+}
+
+.discount-icon svg {
+  width: 12px;
+  height: 12px;
+  color: #2f9b68;
+}
+
+.discount-label {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  color: #2f9b68;
+  letter-spacing: 0.03em;
+}
+
+.discount-amount {
+  font-family: "Courier Prime", monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: #2f9b68;
+}
+
+/* ===== SUMMARY ===== */
+.summary-section {
+  margin-top: 4px;
+  position: relative;
+  z-index: 1;
+}
+
+.summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+}
+
+.summary-row.subtotal {
+  border-bottom: 1px solid #d1d5db;
+  opacity: 0.98;
+}
+
+.summary-row.shipping {
+  border-bottom: 1.5px solid #001f3c;
+  opacity: 0.98;
+}
+
+.summary-row.total {
+  padding: 10px 0 6px;
+  border-bottom: none;
+  opacity: 1;
+}
+
+.summary-label {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  color: #8c92a1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.summary-row.total .summary-label {
+  font-size: 10px;
+  font-weight: 800;
+  color: #001f3c;
+  letter-spacing: 0.06em;
+}
+
+.summary-amount {
+  font-family: "DM Sans", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #001f3c;
+}
+
+.summary-row.total .summary-amount {
+  font-family: "DM Sans", sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: #001f3c;
+}
+
+.shipping-free {
+  font-family: "DM Sans", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #2f9b68;
+}
+
+/* ===== FOOTER ===== */
+.receipt-footer {
+  text-align: center;
+  margin-top: 10px;
+  padding-top: 6px;
+  border-top: 1px dashed #d1d5db;
+  position: relative;
+  z-index: 1;
+}
+
+.footer-thanks {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #7c6ff7;
+  letter-spacing: 0.02em;
+}
+
+/* ===== SYSTEM GENERATED ===== */
+.system-generated {
+  position: absolute;
+  bottom: 6px;
+  right: 12px;
+  font-family: "Courier Prime", monospace;
+  font-size: 6px;
+  font-weight: 400;
+  color: #c5c9d4;
+  letter-spacing: 0.02em;
+  z-index: 1;
+}
+</style>
+</head>
+<body>
+
+<div class="receipt">
+  <!-- ===== WAVE HEADER ONLY — TALLER WAVES IN MIDDLE ===== -->
+  <div class="wave-header">
+    <div class="wave-bg">
+      <svg viewBox="0 0 420 80" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="baseGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#e8f4fc"/>
+            <stop offset="50%" stop-color="#d0e8f7"/>
+            <stop offset="100%" stop-color="#b8dcf2"/>
+          </linearGradient>
+          <linearGradient id="deepWave" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#4a8ab5"/>
+            <stop offset="40%" stop-color="#3a7aa5"/>
+            <stop offset="100%" stop-color="#2a6a95"/>
+          </linearGradient>
+          <linearGradient id="midWave" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#7ab8d8"/>
+            <stop offset="50%" stop-color="#5aa0c8"/>
+            <stop offset="100%" stop-color="#4a90b8"/>
+          </linearGradient>
+          <linearGradient id="lightWave" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#a8d0e8"/>
+            <stop offset="60%" stop-color="#88c0d8"/>
+            <stop offset="100%" stop-color="#78b0c8"/>
+          </linearGradient>
+          <linearGradient id="extraWave1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#6aa8d0"/>
+            <stop offset="100%" stop-color="#4a88b0"/>
+          </linearGradient>
+          <linearGradient id="extraWave2" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#98c8e8"/>
+            <stop offset="100%" stop-color="#78a8c8"/>
+          </linearGradient>
+          <filter id="waveShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1a4a6a" flood-opacity="0.15"/>
+          </filter>
+          <filter id="waveShadow2" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#1a4a6a" flood-opacity="0.12"/>
+          </filter>
+        </defs>
+
+        <rect width="420" height="80" fill="url(#baseGrad)"/>
+
+        <!-- Deep wave — back -->
+        <path d="M-10,-5 C50,15 90,45 150,25 C210,5 250,55 310,30 C370,5 410,40 430,15 L430,80 L-10,80 Z" 
+              fill="url(#deepWave)" opacity="0.3" filter="url(#waveShadow)"/>
+
+        <!-- Mid wave — middle layer 1 -->
+        <path d="M-10,10 C70,-5 130,50 190,20 C250,-5 310,45 370,15 C400,0 430,30 430,10 L430,80 L-10,80 Z" 
+              fill="url(#midWave)" opacity="0.35" filter="url(#waveShadow2)"/>
+
+        <!-- Extra middle wave 1 — new -->
+        <path d="M-10,20 C60,5 120,45 180,18 C240,-2 300,40 360,12 C390,0 420,25 430,15 L430,80 L-10,80 Z" 
+              fill="url(#extraWave1)" opacity="0.3"/>
+
+        <!-- Light wave — middle layer 2 -->
+        <path d="M-10,30 C60,10 140,60 200,25 C260,0 320,50 380,20 C410,5 430,35 430,20 L430,80 L-10,80 Z" 
+              fill="url(#lightWave)" opacity="0.4"/>
+
+        <!-- Extra middle wave 2 — new -->
+        <path d="M-10,40 C80,18 160,55 220,30 C280,8 340,48 400,28 C420,18 430,42 430,30 L430,80 L-10,80 Z" 
+              fill="url(#extraWave2)" opacity="0.35"/>
+
+        <!-- Highlight wave — front -->
+        <path d="M-10,50 C90,30 170,65 230,38 C290,18 350,52 410,35 C425,26 430,48 430,38 L430,80 L-10,80 Z" 
+              fill="#c8e4f4" opacity="0.3"/>
+      </svg>
+    </div>
+
+    <div class="receipt-header">
+      <div class="header-logo">
+        <svg viewBox="0 0 200 200" width="26" height="26">
+          <defs>
+            <linearGradient id="ringRed" x1="28" y1="170" x2="150" y2="35">
+              <stop stop-color="#9f1f2b"/><stop offset="0.55" stop-color="#b82836"/><stop offset="1" stop-color="#c43a42"/>
+            </linearGradient>
+            <linearGradient id="pillOrange" x1="108" y1="62" x2="160" y2="111">
+              <stop stop-color="#ff9b31"/><stop offset="1" stop-color="#ee842f"/>
+            </linearGradient>
+          </defs>
+          <path d="M111 36 A65 65 0 1 0 164 89" fill="none" stroke="url(#ringRed)" stroke-width="26" stroke-linecap="round"/>
+          <g transform="translate(122 78) rotate(45)">
+            <path d="M-22 -3 L-22 -35 A22 22 0 0 1 22 -35 L22 -3 Z" fill="url(#pillOrange)"/>
+          </g>
+        </svg>
+      </div>
+      <div class="header-brand">
+        <div class="header-name">SuppVerse</div>
+        <div class="header-bd">BD</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SEPARATE SECTIONS BELOW HEADER ===== -->
+  <div class="header-line"></div>
+  <div class="invoice-label">Invoice</div>
+
+  <!-- Meta -->
+  <div class="receipt-meta">
+    <div class="meta-left">
+      <div class="meta-label">Bill To</div>
+      <div class="meta-value">Hasan</div>
+      <div class="meta-value-sm">Dhaka, Bangladesh</div>
+      <div class="meta-phone">+880 1712-345678</div>
+    </div>
+    <div class="meta-right">
+      <div class="meta-order">SV-1011</div>
+      <div class="meta-date">25 Apr 2026</div>
+      <div class="status-pill status-paid" id="statusPill">
+        <svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        <span class="status-text">Paid</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Items -->
+  <div class="item-row">
+    <div class="item-left">
+      <div class="item-name">Omega-3 Ultra</div>
+      <div class="item-unit">
+        <span class="unit-qty">2u</span>
+        <span class="unit-sep">×</span>
+        <span class="unit-price">৳11,900</span>
+      </div>
+    </div>
+    <div class="item-right">
+      <div class="item-total">৳23,800</div>
+    </div>
+  </div>
+
+  <div class="item-row">
+    <div class="item-left">
+      <div class="item-name">Magnesium Glycinate</div>
+      <div class="item-unit">
+        <span class="unit-qty">1u</span>
+        <span class="unit-sep">×</span>
+        <span class="unit-price">৳3,250</span>
+      </div>
+    </div>
+    <div class="item-right">
+      <div class="item-total">৳3,250</div>
+    </div>
+  </div>
+
+  <div class="item-row">
+    <div class="item-left">
+      <div class="item-name">Betaine HCL & Pepsin</div>
+      <div class="item-unit">
+        <span class="unit-qty">3u</span>
+        <span class="unit-sep">×</span>
+        <span class="unit-price">৳3,000</span>
+      </div>
+    </div>
+    <div class="item-right">
+      <div class="item-total">৳9,000</div>
+    </div>
+  </div>
+
+  <!-- Discount Row -->
+  <div class="discount-row">
+    <div class="discount-badge">
+      <div class="discount-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
+          <line x1="7" y1="7" x2="7.01" y2="7"/>
+        </svg>
+      </div>
+      <div class="discount-label">Discount</div>
+    </div>
+    <div class="discount-amount">-৳500</div>
+  </div>
+
+  <!-- Summary Section -->
+  <div class="summary-section">
+    <div class="summary-row subtotal">
+      <div class="summary-label">Subtotal</div>
+      <div class="summary-amount">৳36,050</div>
+    </div>
+    <div class="summary-row shipping">
+      <div class="summary-label">Shipping</div>
+      <div class="summary-amount shipping-free" id="shippingAmount">Free</div>
+    </div>
+    <div class="summary-row total">
+      <div class="summary-label">Total</div>
+      <div class="summary-amount">৳24,150</div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="receipt-footer">
+    <div class="footer-thanks">Thank you for choosing SuppVerse BD</div>
+  </div>
+
+  <!-- System Generated -->
+  <div class="system-generated">Generated automatically by SuppVerse System</div>
+</div>
+
+<script>
+const STATUS_CONFIG = {
+  paid: {
+    text: "Paid",
+    class: "status-paid",
+    icon: `<polyline points="20 6 9 17 4 12"/>`
+  },
+  pending: {
+    text: "Pending",
+    class: "status-pending",
+    icon: `<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>`
+  },
+  returned: {
+    text: "Returned",
+    class: "status-returned",
+    icon: `<path d="M3 7v6h6"/><path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"/>`
+  }
+};
+
+function setStatus(status) {
+  const pill = document.getElementById("statusPill");
+  if (!pill) return;
+  const cfg = STATUS_CONFIG[status.toLowerCase()];
+  if (!cfg) {
+    console.warn(`Unknown status: ${status}`);
+    return;
+  }
+  pill.classList.remove("status-paid", "status-pending", "status-returned");
+  pill.classList.add(cfg.class);
+  pill.querySelector(".status-text").textContent = cfg.text;
+  pill.querySelector(".status-icon").innerHTML = cfg.icon;
+}
+
+function setShipping(charge) {
+  const el = document.getElementById("shippingAmount");
+  if (!el) return;
+  if (!charge || charge === 0) {
+    el.textContent = "Free";
+    el.classList.add("shipping-free");
+  } else {
+    el.textContent = "৳" + charge.toLocaleString("en-BD");
+    el.classList.remove("shipping-free");
+  }
+}
+
+setShipping(0);
+</script>
+
+</body>
+</html>
