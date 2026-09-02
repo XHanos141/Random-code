@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<style>
+  /* --- BASE DASHBOARD STYLING --- */
+  body {
+    background-color: #eef2f6; /* Soft dashboard background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+  }
+
+  /* --- THE TOGGLE CONTAINER --- */
+  .theme-switch {
+    position: relative;
+    display: inline-block;
+    width: 240px;
+    height: 100px;
+    cursor: pointer;
+  }
+
+  .theme-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  /* The 3D Cutout Hole */
+  .switch-body {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: 60px;
+    overflow: hidden;
+    background: #5db0f5; /* Day Sky Base */
+    /* This creates the realistic deep shadow inside the pill */
+    box-shadow: inset 0 12px 20px rgba(0, 0, 0, 0.25), 
+                inset 0 -6px 10px rgba(255, 255, 255, 1),
+                0 4px 10px rgba(0,0,0,0.05);
+    transition: background 0.6s ease;
+  }
+
+  /* --- DAY SKY & CLOUDS --- */
+  .day-layer {
+    position: absolute;
+    width: 100%; height: 100%;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  /* Layering circles to create the exact fluffy clouds */
+  .cloud { position: absolute; background: #ffffff; border-radius: 50%; }
+  
+  /* Back Clouds (Slightly blue) */
+  .cloud-back-1 { width: 100px; height: 100px; bottom: -30px; right: -20px; background: #a2d2fb; }
+  .cloud-back-2 { width: 80px; height: 80px; bottom: -10px; right: 50px; background: #96cbfb; }
+  
+  /* Front Clouds (Pure White) */
+  .cloud-front-1 { width: 90px; height: 90px; bottom: -40px; right: 10px; }
+  .cloud-front-2 { width: 70px; height: 70px; bottom: -30px; right: 70px; }
+  .cloud-front-3 { width: 60px; height: 60px; bottom: -30px; right: 120px; }
+  .cloud-front-4 { width: 50px; height: 50px; bottom: -20px; right: 160px; }
+
+  /* --- NIGHT SKY & STARS --- */
+  .night-layer {
+    position: absolute;
+    width: 100%; height: 100%;
+    background: #1f2533; /* Dark Night Base */
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  /* The subtle glow rings behind the moon */
+  .halo {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.04);
+  }
+  .halo-1 { width: 220px; height: 220px; top: -60px; right: -40px; }
+  .halo-2 { width: 160px; height: 160px; top: -30px; right: -10px; }
+  .halo-3 { width: 100px; height: 100px; top: 0px; right: 20px; }
+
+  /* 4-Point Stars & Dots */
+  .star { position: absolute; fill: #ffffff; }
+  .star-svg-1 { width: 14px; top: 20px; left: 100px; }
+  .star-svg-2 { width: 18px; bottom: 20px; left: 130px; }
+  .star-svg-3 { width: 10px; top: 15px; left: 45px; }
+  
+  .star-dot { position: absolute; background: #ffffff; border-radius: 50%; }
+  .dot-1 { width: 4px; height: 4px; top: 40px; left: 80px; }
+  .dot-2 { width: 3px; height: 3px; bottom: 35px; left: 55px; }
+  
+  /* The glowing planet/star bottom left */
+  .planet-ring {
+    position: absolute; width: 12px; height: 12px;
+    border: 2px solid #5a6478; border-radius: 50%;
+    bottom: 20px; left: 40px;
+    display: flex; justify-content: center; align-items: center;
+  }
+  .planet-ring::after { content: ''; width: 4px; height: 4px; background: #ffffff; border-radius: 50%; }
+
+  /* --- THE ORB (SUN / MOON) --- */
+  .orb {
+    position: absolute;
+    top: 8px; left: 8px;
+    width: 84px; height: 84px;
+    border-radius: 50%;
+    background: #ffcf33; /* Sun Yellow */
+    box-shadow: 0 6px 12px rgba(255, 207, 51, 0.5), 
+                inset -4px -4px 8px rgba(0, 0, 0, 0.1); /* 3D volume */
+    transition: transform 0.7s cubic-bezier(0.5, 1.5, 0.5, 1), 
+                background 0.5s ease, box-shadow 0.5s ease;
+    z-index: 10;
+    overflow: hidden;
+  }
+
+  /* Moon Craters (Hidden on Sun) */
+  .crater {
+    position: absolute;
+    background: #aab5c6;
+    border-radius: 50%;
+    opacity: 0;
+    /* Inset shadow creates the hole effect */
+    box-shadow: inset 2px 2px 4px rgba(0,0,0,0.2), inset -1px -1px 2px rgba(255,255,255,0.3);
+    transition: opacity 0.4s ease;
+  }
+  .crater-1 { width: 22px; height: 22px; top: 25px; left: 15px; }
+  .crater-2 { width: 14px; height: 14px; top: 15px; right: 20px; }
+  .crater-3 { width: 18px; height: 18px; bottom: 15px; right: 25px; }
+
+
+  /* ========================================= */
+  /* --- ANIMATIONS & STATE CHANGES (NIGHT) -- */
+  /* ========================================= */
+
+  /* Move and change the Orb to Moon */
+  input:checked ~ .switch-body .orb {
+    transform: translateX(140px);
+    background: #dde4ed; /* Moon Grey */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3), 
+                inset -6px -6px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Show Craters */
+  input:checked ~ .switch-body .orb .crater {
+    opacity: 1;
+    transition-delay: 0.2s; /* Delays appearance slightly for effect */
+  }
+
+  /* Change Background to Night */
+  input:checked ~ .switch-body {
+    background: #1f2533;
+  }
+
+  /* Hide Day Layer (Clouds sink down) */
+  input:checked ~ .switch-body .day-layer {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  /* Show Night Layer (Stars rise up) */
+  input:checked ~ .switch-body .night-layer {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+</style>
+</head>
+<body>
+
+<!-- THE HTML STRUCTURE -->
+<label class="theme-switch">
+  <input type="checkbox" id="checkbox" />
+  
+  <div class="switch-body">
+    
+    <!-- Night Layer (Underneath) -->
+    <div class="night-layer">
+      <!-- Glow Rings -->
+      <div class="halo halo-1"></div>
+      <div class="halo halo-2"></div>
+      <div class="halo halo-3"></div>
+      
+      <!-- Stars (Using SVG for exact 4-point shape) -->
+      <svg class="star star-svg-1" viewBox="0 0 24 24"><path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z"/></svg>
+      <svg class="star star-svg-2" viewBox="0 0 24 24"><path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z"/></svg>
+      <svg class="star star-svg-3" viewBox="0 0 24 24"><path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z"/></svg>
+      
+      <!-- Dots & Ring -->
+      <div class="star-dot dot-1"></div>
+      <div class="star-dot dot-2"></div>
+      <div class="planet-ring"></div>
+    </div>
+
+    <!-- Day Layer (On Top) -->
+    <div class="day-layer">
+      <div class="cloud cloud-back-1"></div>
+      <div class="cloud cloud-back-2"></div>
+      
+      <div class="cloud cloud-front-1"></div>
+      <div class="cloud cloud-front-2"></div>
+      <div class="cloud cloud-front-3"></div>
+      <div class="cloud cloud-front-4"></div>
+    </div>
+
+    <!-- The Sun / Moon -->
+    <div class="orb">
+      <div class="crater crater-1"></div>
+      <div class="crater crater-2"></div>
+      <div class="crater crater-3"></div>
+    </div>
+    
+  </div>
+</label>
+
+</body>
+</html>
