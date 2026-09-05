@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Banner Color Options — SuppVerse BD</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F7FB; --text:#0B1220; --text2:#5E6B7D;
+  --accent:#0A9BDC;
+  --green:#2f9b68;
+  --purple:#7C6FF7;
+  --radius:18px;
+  --font-body:'DM Sans',sans-serif; --font-display:'Plus Jakarta Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:var(--font-body);background:var(--bg);color:var(--text);
+  min-height:100dvh;padding:20px 16px 60px;
+}
+.page-title{font-family:var(--font-display);font-size:18px;font-weight:800;margin-bottom:2px}
+.page-sub{font-size:12px;color:var(--text2);margin-bottom:22px}
+
+.option-label{
+  font-family:var(--font-display);font-size:12px;font-weight:800;
+  letter-spacing:.4px;text-transform:uppercase;color:var(--text2);
+  margin:0 2px 8px;display:flex;align-items:center;gap:8px;
+}
+.option-label .num{
+  width:20px;height:20px;border-radius:6px;background:var(--purple);color:#fff;
+  display:inline-flex;align-items:center;justify-content:center;font-size:11px;
+}
+.option-block{margin-bottom:30px}
+.option-desc{font-size:11.5px;color:var(--text2);margin-top:8px;padding:0 2px;line-height:1.5}
+
+/* ===== ID CARD (shared structure) ===== */
+.id-card{
+  position:relative;overflow:hidden;border-radius:var(--radius);
+  padding:20px 18px;color:#fff;
+  box-shadow:0 10px 30px rgba(0,20,50,0.28);
+}
+.id-card::after{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(65deg,transparent 0 26px,rgba(255,255,255,0.045) 26px 27px);
+  pointer-events:none;
+}
+.id-top{display:flex;align-items:center;gap:12px;position:relative;z-index:1}
+.id-avatar{
+  width:52px;height:52px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),#4fb7ea);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-weight:800;font-size:18px;color:#fff;
+  box-shadow:0 4px 14px rgba(45,190,245,0.35),inset 0 1px 0 rgba(255,255,255,0.25);
+}
+.id-name-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px}
+.id-name{font-family:var(--font-display);font-size:17px;font-weight:800}
+.id-tag{
+  display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;
+  padding:3px 9px 3px 7px;border-radius:20px;
+}
+.id-tag svg{width:11px;height:11px}
+.id-tag.role{background:rgba(47,155,104,0.22);color:#5be0a0;border:1px solid rgba(91,224,160,0.3)}
+.id-tag.verified{background:rgba(47,155,104,0.22);color:#5be0a0;border:1px solid rgba(91,224,160,0.3)}
+.id-email{font-size:12.5px;color:rgba(255,255,255,0.65)}
+.cid-wrap{position:relative;z-index:1;margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1)}
+.cid-label{font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:rgba(255,255,255,0.45);display:block;margin-bottom:7px}
+.cid-row{display:flex;align-items:center;gap:8px}
+.cid-value{
+  font-family:'Courier New',monospace;font-size:14px;font-weight:700;letter-spacing:.5px;
+  background:rgba(124,111,247,0.16);border:1px solid rgba(124,111,247,0.4);
+  padding:7px 12px;border-radius:8px;flex:1;color:#c9c3ff;
+}
+.cid-copy{
+  width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;
+  color:rgba(255,255,255,0.7);flex-shrink:0;
+}
+.cid-copy svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ===== OPTION 1: Purple-black ===== */
+.opt-purple{
+  background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(255,255,255,0.06) 0%,transparent 65%),
+             radial-gradient(ellipse 65% 85% at -10% 0%,rgba(124,111,247,0.38) 0%,transparent 55%),
+             linear-gradient(135deg,#2a1f52 0%,#1a1240 28%,#120b30 60%,#08051a 100%);
+}
+
+/* ===== OPTION 2: Green-black ===== */
+.opt-green{
+  background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(255,255,255,0.06) 0%,transparent 65%),
+             radial-gradient(ellipse 65% 85% at -10% 0%,rgba(47,155,104,0.32) 0%,transparent 55%),
+             linear-gradient(135deg,#123527 0%,#0c2a1e 28%,#081f16 60%,#040f0b 100%);
+}
+
+/* ===== OPTION 3: Neutral graphite ===== */
+.opt-graphite{
+  background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(255,255,255,0.05) 0%,transparent 65%),
+             radial-gradient(ellipse 65% 85% at -10% 0%,rgba(255,255,255,0.05) 0%,transparent 55%),
+             linear-gradient(135deg,#2c2f36 0%,#20232a 28%,#17191f 60%,#0d0e12 100%);
+}
+</style>
+</head>
+<body>
+
+<div class="page-title">Banner Color Options</div>
+<div class="page-sub">Same card, three background treatments — swipe/scroll to compare</div>
+
+<div class="option-block">
+  <div class="option-label"><span class="num">1</span>Purple-Black</div>
+  <div class="id-card opt-purple">
+    <div class="id-top">
+      <div class="id-avatar">H</div>
+      <div style="flex:1;min-width:0">
+        <div class="id-name-row">
+          <span class="id-name">Hasan</span>
+          <span class="id-tag role">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2 4 5v6c0 5.25 3.4 9.9 8 11 4.6-1.1 8-5.75 8-11V5l-8-3Z"/></svg>
+            Admin
+          </span>
+          <span class="id-tag verified">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><path fill="currentColor" d="m21.5609 10.7386-1.36-1.58001c-.26-.3-.47-.86-.47-1.26v-1.7c0-1.06-.87-1.93-1.93-1.93h-1.7c-.39 0-.96-.21-1.26-.47l-1.58-1.36c-.69-.59-1.82-.59-2.52 0l-1.57004 1.37c-.3.25-.87.46-1.26.46h-1.73c-1.06 0-1.93.87-1.93 1.93v1.71c0 .39-.21.95-.46 1.25l-1.35 1.59001c-.58.69-.58 1.81 0 2.5l1.35 1.59c.25.3.46.86.46 1.25v1.71c0 1.06.87 1.93 1.93 1.93h1.73c.39 0 .96.21 1.26.47l1.58004 1.36c.69.59 1.82.59 2.52 0l1.58-1.36c.3-.26.86-.47 1.26-.47h1.7c1.06 0 1.93-.87 1.93-1.93v-1.7c0-.39.21-.96.47-1.26l1.36-1.58c.58-.69.58-1.83-.01-2.52m-5.4-.63-4.83 4.83c-.14.14-.33.22-.53.22s-.39-.08-.53-.22l-2.42004-2.42c-.29-.29-.29-.77 0-1.06s.77-.29 1.06 0l1.89004 1.89 4.3-4.30001c.29-.29.77-.29 1.06 0s.29.77 0 1.06001"/></svg>
+            Verified
+          </span>
+        </div>
+        <div class="id-email">hasan@suppversebd.com</div>
+      </div>
+    </div>
+    <div class="cid-wrap">
+      <span class="cid-label">Admin ID</span>
+      <div class="cid-row">
+        <span class="cid-value">SV-ADM-001</span>
+        <button class="cid-copy"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+      </div>
+    </div>
+  </div>
+  <div class="option-desc">Blends into near-black using your primary purple (#7C6FF7). Feels distinctly "SuppVerse" rather than a generic dark admin panel.</div>
+</div>
+
+<div class="option-block">
+  <div class="option-label"><span class="num">2</span>Green-Black</div>
+  <div class="id-card opt-green">
+    <div class="id-top">
+      <div class="id-avatar">H</div>
+      <div style="flex:1;min-width:0">
+        <div class="id-name-row">
+          <span class="id-name">Hasan</span>
+          <span class="id-tag role">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2 4 5v6c0 5.25 3.4 9.9 8 11 4.6-1.1 8-5.75 8-11V5l-8-3Z"/></svg>
+            Admin
+          </span>
+          <span class="id-tag verified">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><path fill="currentColor" d="m21.5609 10.7386-1.36-1.58001c-.26-.3-.47-.86-.47-1.26v-1.7c0-1.06-.87-1.93-1.93-1.93h-1.7c-.39 0-.96-.21-1.26-.47l-1.58-1.36c-.69-.59-1.82-.59-2.52 0l-1.57004 1.37c-.3.25-.87.46-1.26.46h-1.73c-1.06 0-1.93.87-1.93 1.93v1.71c0 .39-.21.95-.46 1.25l-1.35 1.59001c-.58.69-.58 1.81 0 2.5l1.35 1.59c.25.3.46.86.46 1.25v1.71c0 1.06.87 1.93 1.93 1.93h1.73c.39 0 .96.21 1.26.47l1.58004 1.36c.69.59 1.82.59 2.52 0l1.58-1.36c.3-.26.86-.47 1.26-.47h1.7c1.06 0 1.93-.87 1.93-1.93v-1.7c0-.39.21-.96.47-1.26l1.36-1.58c.58-.69.58-1.83-.01-2.52m-5.4-.63-4.83 4.83c-.14.14-.33.22-.53.22s-.39-.08-.53-.22l-2.42004-2.42c-.29-.29-.29-.77 0-1.06s.77-.29 1.06 0l1.89004 1.89 4.3-4.30001c.29-.29.77-.29 1.06 0s.29.77 0 1.06001"/></svg>
+            Verified
+          </span>
+        </div>
+        <div class="id-email">hasan@suppversebd.com</div>
+      </div>
+    </div>
+    <div class="cid-wrap">
+      <span class="cid-label">Admin ID</span>
+      <div class="cid-row">
+        <span class="cid-value">SV-ADM-001</span>
+        <button class="cid-copy"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+      </div>
+    </div>
+  </div>
+  <div class="option-desc">Deep charcoal with a green (#2f9b68) undertone — ties directly to the Admin/Verified badges already on this card.</div>
+</div>
+
+<div class="option-block">
+  <div class="option-label"><span class="num">3</span>Neutral Graphite</div>
+  <div class="id-card opt-graphite">
+    <div class="id-top">
+      <div class="id-avatar">H</div>
+      <div style="flex:1;min-width:0">
+        <div class="id-name-row">
+          <span class="id-name">Hasan</span>
+          <span class="id-tag role">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2 4 5v6c0 5.25 3.4 9.9 8 11 4.6-1.1 8-5.75 8-11V5l-8-3Z"/></svg>
+            Admin
+          </span>
+          <span class="id-tag verified">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><path fill="currentColor" d="m21.5609 10.7386-1.36-1.58001c-.26-.3-.47-.86-.47-1.26v-1.7c0-1.06-.87-1.93-1.93-1.93h-1.7c-.39 0-.96-.21-1.26-.47l-1.58-1.36c-.69-.59-1.82-.59-2.52 0l-1.57004 1.37c-.3.25-.87.46-1.26.46h-1.73c-1.06 0-1.93.87-1.93 1.93v1.71c0 .39-.21.95-.46 1.25l-1.35 1.59001c-.58.69-.58 1.81 0 2.5l1.35 1.59c.25.3.46.86.46 1.25v1.71c0 1.06.87 1.93 1.93 1.93h1.73c.39 0 .96.21 1.26.47l1.58004 1.36c.69.59 1.82.59 2.52 0l1.58-1.36c.3-.26.86-.47 1.26-.47h1.7c1.06 0 1.93-.87 1.93-1.93v-1.7c0-.39.21-.96.47-1.26l1.36-1.58c.58-.69.58-1.83-.01-2.52m-5.4-.63-4.83 4.83c-.14.14-.33.22-.53.22s-.39-.08-.53-.22l-2.42004-2.42c-.29-.29-.29-.77 0-1.06s.77-.29 1.06 0l1.89004 1.89 4.3-4.30001c.29-.29.77-.29 1.06 0s.29.77 0 1.06001"/></svg>
+            Verified
+          </span>
+        </div>
+        <div class="id-email">hasan@suppversebd.com</div>
+      </div>
+    </div>
+    <div class="cid-wrap">
+      <span class="cid-label">Admin ID</span>
+      <div class="cid-row">
+        <span class="cid-value">SV-ADM-001</span>
+        <button class="cid-copy"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+      </div>
+    </div>
+  </div>
+  <div class="option-desc">Near-black with a warm/cool grey tint, no color story. Minimal and premium — badges and accents pop more since the background stays quiet.</div>
+</div>
+
+</body>
+</html>
