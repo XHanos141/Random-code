@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment Countdown — 20:00</title>
+<style>
+  :root{
+    --bg:#ffffff;
+    --muted:#8a8f99;
+    --ring-color:#009b72;
+    --timer-color:#10233f;
+    --spinner-color:#2a2d34;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--bg);
+    font-family:'Space Grotesk','DM Sans',system-ui,sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .stage{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:18px;
+  }
+  .ring-wrap{
+    position:relative;
+    width:240px;
+    height:240px;
+  }
+  #ring{
+    position:absolute;
+    top:50%;
+    left:50%;
+    width:120px;
+    height:120px;
+    transform:translate(-50%, -50%);
+  }
+  #ring path{
+    stroke: var(--ring-color) !important;
+    transition: stroke 0.3s ease;
+  }
+  .readout{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-variant-numeric:tabular-nums;
+    font-size:26px;
+    font-weight:700;
+    letter-spacing:1px;
+    color:var(--timer-color);
+  }
+  .spinner{
+    position:absolute;
+    inset:0;
+    transform-origin:50% 50%;
+  }
+  .label{
+    color:var(--muted);
+    font-size:13px;
+    letter-spacing:0.02em;
+  }
+  body.expired .readout, body.expired .label{ color:var(--muted); }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div class="ring-wrap">
+      <div id="ring"></div>
+      <svg class="spinner" id="spinner" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="120" cy="120" r="38" fill="none" stroke="var(--spinner-color)" stroke-width="5"
+          stroke-linecap="round" stroke-dasharray="29 209.8" />
+      </svg>
+      <div class="readout" id="timerText">20:00</div>
+    </div>
+    <div class="label" id="statusLabel">Complete payment before time runs out</div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/lottie-web@5.12.2/build/player/lottie.min.js"></script>
+<script>
+  var LOTTIE_DATA = {"v":"5.3.4","fr":48,"ip":0,"op":354,"w":774,"h":776,"nm":"cd10","ddd":0,"assets":[],"layers":[{"ddd":0,"ind":3,"ty":4,"nm":"\u0421\u043b\u043e\u0439 28","td":1,"sr":1,"ks":{"o":{"a":0,"k":100,"ix":11},"r":{"a":0,"k":0,"ix":10},"p":{"a":0,"k":[388,390,0],"ix":2},"a":{"a":0,"k":[0,0,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6}},"ao":0,"shapes":[{"ty":"gr","it":[{"ind":0,"ty":"sh","ix":1,"ks":{"a":0,"k":{"i":[[0.0,186.949],[186.949,0.0],[0.0,-186.949],[-186.949,0.0]],"o":[[0.0,-186.949],[-186.949,0.0],[0.0,186.949],[186.949,0.0]],"v":[[338.5,0.0],[0.0,-338.5],[-338.5,0.0],[0.0,338.5]],"c":true},"ix":2},"nm":"Path 1","mn":"ADBE Vector Shape - Group","hd":false},{"ty":"st","c":{"a":0,"k":[0,0,0,1],"ix":3},"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":60,"ix":5},"lc":1,"lj":1,"ml":10,"ml2":{"a":0,"k":10,"ix":8},"nm":"Stroke 1","mn":"ADBE Vector Graphic - Stroke","hd":false},{"ty":"tr","p":{"a":0,"k":[0,0],"ix":2},"a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"r":{"a":0,"k":0,"ix":6},"o":{"a":0,"k":100,"ix":7},"sk":{"a":0,"k":0,"ix":4},"sa":{"a":0,"k":0,"ix":5},"nm":"Transform"}],"nm":"Group 1","np":2,"cix":2,"ix":1,"mn":"ADBE Vector Group","hd":false},{"ty":"tm","s":{"a":0,"k":0,"ix":1},"e":{"a":1,"k":[{"i":{"x":[1],"y":[1]},"o":{"x":[0],"y":[0]},"n":["0p619_0p999_0p294_0p006"],"t":0,"s":[100],"e":[0]},{"t":352}],"ix":2},"o":{"a":0,"k":90,"ix":3},"m":1,"ix":2,"nm":"Trim Paths 1","mn":"ADBE Vector Filter - Trim","hd":false}],"ip":0,"op":400,"st":0,"bm":0},{"ddd":0,"ind":4,"ty":4,"nm":"\u0421\u043b\u043e\u0439 27","tt":2,"sr":1,"ks":{"o":{"a":0,"k":100,"ix":11},"r":{"a":0,"k":0,"ix":10},"p":{"a":0,"k":[388,390,0],"ix":2},"a":{"a":0,"k":[0,0,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6}},"ao":0,"shapes":[{"ty":"gr","it":[{"ind":0,"ty":"sh","ix":1,"ks":{"a":0,"k":{"i":[[0.0,-186.949],[186.949,0.0],[0.0,186.949],[-186.949,0.0]],"o":[[0.0,186.949],[-186.949,0.0],[0.0,-186.949],[186.949,0.0]],"v":[[338.5,0.0],[0.0,338.5],[-338.5,0.0],[0.0,-338.5]],"c":true},"ix":2},"nm":"Path 1","mn":"ADBE Vector Shape - Group","hd":false},{"ty":"st","c":{"a":0,"k":[0,0,0,1],"ix":3},"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":90,"ix":5},"lc":2,"lj":1,"ml":10,"ml2":{"a":0,"k":10,"ix":8},"nm":"Stroke 1","mn":"ADBE Vector Graphic - Stroke","hd":false},{"ty":"tr","p":{"a":0,"k":[0,0],"ix":2},"a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"r":{"a":0,"k":0,"ix":6},"o":{"a":0,"k":100,"ix":7},"sk":{"a":0,"k":0,"ix":4},"sa":{"a":0,"k":0,"ix":5},"nm":"Transform"}],"nm":"Group 1","np":2,"cix":2,"ix":1,"mn":"ADBE Vector Group","hd":false}],"ip":0,"op":400,"st":0,"bm":0}],"markers":[]};
+
+  var params = new URLSearchParams(location.search);
+  var testVal = parseInt(params.get('test'), 10);
+  var TOTAL_SECONDS = params.has('test') && !isNaN(testVal) ? testVal : 20 * 60;
+  TOTAL_SECONDS = Math.max(1, TOTAL_SECONDS);
+
+  var NATIVE_IP = LOTTIE_DATA.ip;
+  var NATIVE_OP = LOTTIE_DATA.op;
+
+  if (typeof lottie === 'undefined') {
+    document.getElementById('statusLabel').textContent = 'Animation library failed to load';
+    throw new Error('lottie-web did not load from CDN');
+  }
+
+  var anim = lottie.loadAnimation({
+    container: document.getElementById('ring'),
+    renderer: 'svg',
+    loop: false,
+    autoplay: false,
+    animationData: LOTTIE_DATA
+  });
+
+  function formatTime(totalSec){
+    var m = Math.floor(totalSec / 60);
+    var s = Math.floor(totalSec % 60);
+    return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+  }
+
+  var COLOR_GREEN = '#009b72';
+  var COLOR_GOLD = '#F4A922';
+  var COLOR_RED = '#d95353';
+
+  function updateRingColor(remaining){
+    var color = COLOR_GREEN;
+    if (remaining <= 5 * 60) {
+      color = COLOR_RED;
+    } else if (remaining <= 10 * 60) {
+      color = COLOR_GOLD;
+    }
+    document.documentElement.style.setProperty('--ring-color', color);
+  }
+
+  var startTime = null;
+
+  function tick(now){
+    if (startTime === null) startTime = now;
+    var elapsed = (now - startTime) / 1000;
+    var progress = Math.min(1, elapsed / TOTAL_SECONDS);
+    var remaining = Math.max(0, TOTAL_SECONDS - elapsed);
+
+    var frame = NATIVE_IP + progress * (NATIVE_OP - NATIVE_IP);
+    anim.goToAndStop(frame, true);
+    document.getElementById('timerText').textContent = formatTime(remaining);
+    updateRingColor(remaining);
+    document.getElementById('spinner').style.transform = 'rotate(' + (elapsed * 360) + 'deg)';
+
+    if (progress < 1) {
+      requestAnimationFrame(tick);
+    } else {
+      onComplete();
+    }
+  }
+
+  function onComplete(){
+    document.getElementById('timerText').textContent = 'Time out';
+    document.getElementById('statusLabel').textContent = 'Time expired';
+    document.documentElement.style.setProperty('--ring-color', '#8a8f99');
+    document.body.classList.add('expired');
+  }
+
+  anim.addEventListener('DOMLoaded', function(){
+    requestAnimationFrame(tick);
+  });
+</script>
+</body>
+</html>
