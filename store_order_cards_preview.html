@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="description" content="Orders — SuppVerse BD">
+<title>Orders — SuppVerse BD</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+<style>/* ===== FLOW TABS — shared segmented toggle component =====
+   Used by cart.html, orders.html, payment.html.
+   Box background is a fixed neutral tint (not var(--surface2)) so the
+   "tray" reads consistently regardless of how close a page's --surface2
+   happens to sit to its --bg. Layout margin and per-tab active colors
+   are page-specific and stay in each page's own <style> block. */
+.flow-tabs{
+  display:flex;gap:8px;background:rgba(10,20,40,0.045);border-radius:12px;
+  padding:4px;position:relative;
+}
+body.dark-mode .flow-tabs{background:rgba(255,255,255,0.055)}
+.flow-tabs::before{
+  content:'';position:absolute;top:4px;left:4px;
+  width:calc(50% - 6px);height:calc(100% - 8px);
+  background:var(--surface);border-radius:9px;
+  box-shadow:var(--shadow-sm, var(--shadow));
+  transition:transform .32s cubic-bezier(.65,0,.35,1),box-shadow .32s ease;
+  z-index:0;
+}
+.flow-tabs.flow-proxy::before{transform:translateX(calc(100% + 8px));box-shadow:0 2px 8px rgba(242,100,48,0.22)}
+.flow-tabs:not(.flow-proxy)::before{box-shadow:0 2px 8px rgba(0,157,220,0.22)}
+.flow-tab{
+  flex:1;padding:9px;border:none;background:transparent;border-radius:9px;
+  font-size:12px;font-weight:700;color:var(--text2, var(--t2));
+  transition:color .25s ease;cursor:pointer;
+  font-family:var(--font-body, inherit);position:relative;z-index:1;
+}
+.flow-tab.active{background:transparent;color:var(--text)}
+</style>
+<style>
+:root{
+  --bg:#F4F7FB; --surface:#ffffff; --surface2:#F8FAFD;
+  --border:rgba(10,22,40,0.07); --border-strong:rgba(10,22,40,0.10);
+  --text:#0B1220; --text2:#5E6B7D; --text3:#9AA3B2;
+  --accent:#0A9BDC; --accent-soft:rgba(10,155,220,0.08);
+  --orange:#F26430; --orange-soft:rgba(242,100,48,0.10);
+  --green:#0A9B72; --green-soft:rgba(10,155,114,0.10);
+  --yellow:#E5A020; --yellow-soft:rgba(229,160,32,0.10);
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.04),0 1px 2px rgba(0,0,0,0.02);
+  --radius:18px; --radius-sm:12px;
+  --font-body:'DM Sans',sans-serif; --font-display:'Plus Jakarta Sans',sans-serif;
+  --header-h:56px; --bottom-nav-h:64px;
+}
+body.dark-mode{
+  --bg:#0B0F18; --surface:#141B2A; --surface2:#1A2235;
+  --border:rgba(255,255,255,0.06); --border-strong:rgba(255,255,255,0.10);
+  --text:#F0F4FA; --text2:#A0AAB8; --text3:#6B7585;
+  --accent:#2DBEF5; --accent-soft:rgba(45,190,245,0.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+h1,h2,h3,h4,h5,h6{font-family:var(--font-display)}
+body{
+  font-family:var(--font-body);background:var(--bg);color:var(--text);
+  min-height:100dvh;padding-bottom:calc(var(--bottom-nav-h) + 24px);
+  transition:background .3s,color .3s;
+}
+.s-header{
+  position:sticky;top:0;z-index:50;
+  background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(255,255,255,0.03) 0%,transparent 65%),radial-gradient(ellipse 60% 80% at -10% 0%,rgba(124,111,247,0.18) 0%,transparent 55%),linear-gradient(180deg,#0f3258 0%,#002248 22%,#001f3c 55%,#001532 82%,#000d20 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.06),inset 0 -1px 0 rgba(0,0,0,0.65),0 6px 28px rgba(0,0,0,0.55),0 1px 2px rgba(0,0,0,0.7);
+  border-bottom:1px solid rgba(0,0,0,0.5);
+  height:var(--header-h);
+  display:flex;align-items:center;justify-content:space-between;padding:0 16px;
+}
+.s-header-title{
+  position:absolute;left:0;right:0;top:0;bottom:0;
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:none;
+}
+.s-header-spacer{width:88px;flex-shrink:0}
+.header-back{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s ease;flex-shrink:0;margin-right:54px}
+.header-back:active{transform:scale(.92)}
+.header-back svg{width:20px;height:20px;stroke:rgba(255,255,255,.9);stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.header-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.s-header h1{ font-family:var(--font-display);font-size:19px;font-weight:800;letter-spacing:-.3px;color:#fff;text-align:center; }
+.s-header span{ font-size:10px;font-weight:600;color:rgba(255,255,255,0.5);display:block;margin-top:-2px; }
+.s-header-actions{ display:flex;align-items:center;gap:10px; }
+.s-header-btn{
+  width:36px;height:36px;border-radius:10px;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
+  display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.85);cursor:pointer;
+}
+.s-header-btn.is-logged-in{background:#009ddc;border-color:#009ddc;color:#fff}
+#headerAccountBtn{width:40px;height:40px;border-radius:50%;overflow:hidden}
+.hcart-initial{font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:800;color:#fff;line-height:1}
+.hcart-avatar-img{width:100%;height:100%;border-radius:50%;object-fit:cover}
+/* Shared header buttons — matches store.html / index.html / cart.html exactly */
+.theme-toggle{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;overflow:hidden;transition:background .3s ease}
+.theme-toggle:active{transform:scale(.92)}
+.theme-toggle svg{position:absolute;width:18px;height:18px;stroke:rgba(255,255,255,.85);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;transition:all .4s cubic-bezier(.34,1.56,.64,1)}
+.theme-toggle .icon-sun{opacity:1;transform:rotate(0) scale(1)}
+.theme-toggle .icon-moon{opacity:0;transform:rotate(90deg) scale(.5)}
+.theme-toggle.dark .icon-sun{opacity:0;transform:rotate(-90deg) scale(.5)}
+.theme-toggle.dark .icon-moon{opacity:1;transform:rotate(0) scale(1)}
+.hcart{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
+.hcart:active{transform:scale(.92)}
+.hcart.is-logged-in{background:#009ddc;border-color:#009ddc}
+.hcart svg{width:18px;height:18px;stroke:rgba(255,255,255,.85);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+.order-list{ display:flex;flex-direction:column;gap:12px;padding:14px 16px 8px; }
+
+.order-card{
+  background:var(--surface);border:1px solid rgba(10,155,220,0.30);
+  border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm);
+}
+body.dark-mode .order-card{ border-color:rgba(45,190,245,0.32); }
+
+.oc-head{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:12px 14px;border-bottom:1px solid var(--border);
+  cursor:pointer;
+}
+.oc-head-left{ display:flex;flex-direction:column;gap:2px; }
+.oc-id{
+  font-family:var(--font-display);font-size:11.5px;font-weight:800;
+  padding:2px 7px;border-radius:7px;letter-spacing:.2px;
+  display:inline-flex;align-items:center;justify-content:center;
+  line-height:1;
+}
+.oc-id-row{ display:flex;align-items:center;gap:6px; }
+.oc-id-label{ font-size:10.5px;font-weight:700;color:var(--text3); }
+.oc-id.store{
+  color:var(--accent);background:rgba(10,155,220,0.12);
+  border:1.5px solid rgba(10,155,220,0.35);
+}
+body.dark-mode .oc-id.store{ background:rgba(45,190,245,0.16);border-color:rgba(45,190,245,0.45); }
+.oc-id.proxy{
+  color:var(--orange);background:rgba(242,100,48,0.08);
+  border:1.5px dashed rgba(242,100,48,0.55);
+}
+body.dark-mode .oc-id.proxy{ background:rgba(242,100,48,0.14);border-color:rgba(242,100,48,0.6); }
+.oc-meta{ font-size:10.5px;color:var(--text3);font-weight:600;margin-top:3px; }
+.oc-meta .oc-meta-date{ color:var(--text); }
+.oc-head-right{ display:flex;align-items:center;gap:10px; }
+.oc-chevron{ width:18px;height:18px;color:var(--text3);transition:transform .25s ease; }
+.order-card.collapsed .oc-chevron{ transform:rotate(-90deg); }
+.oc-customer-wrap{
+  max-height:200px;overflow:hidden;
+  transition:max-height .3s ease,opacity .3s ease,margin .3s ease;
+  opacity:1;
+}
+.order-card.collapsed .oc-customer-wrap{
+  max-height:0;opacity:0;margin-bottom:-16px;
+}
+.oc-status-pill{
+  font-size:10.5px;font-weight:800;letter-spacing:.2px;text-transform:none;
+  padding:2px 7px;border-radius:7px;white-space:nowrap;border:1.5px solid transparent;
+}
+.oc-status-pill.shipped{ background:var(--orange-soft);color:var(--orange);border-color:rgba(242,100,48,0.4); }
+
+.oc-status-pill.delivered{ background:var(--green-soft);color:var(--green);border-color:rgba(10,155,114,0.4); }
+.oc-status-pill.quote{ background:#EDE9FE;color:#7C6FF7;border-color:rgba(124,111,247,0.4); }
+.oc-status-pill.paid{ background:var(--accent-soft);color:var(--accent);border-color:rgba(10,155,220,0.4); }
+.oc-status-pill.purchased{ background:var(--accent-soft);color:var(--accent);border-color:rgba(10,155,220,0.4); }
+.oc-status-wrap{ display:flex;flex-direction:column;align-items:flex-end;gap:3px; }
+.oc-status-date{ font-size:10.5px;font-weight:600;color:var(--text); }
+
+
+/* Buy For Me dynamic cards */
+.px-state{ text-align:center;padding:40px 16px;color:var(--text3);font-size:13px;font-weight:600; }
+.px-state a{ color:var(--orange);font-weight:800;text-decoration:none; }
+.oc-id.rq{ color:var(--orange);background:rgba(242,100,48,0.08);border:1.5px solid rgba(242,100,48,0.55); }
+body.dark-mode .oc-id.rq{ background:rgba(242,100,48,0.14);border-color:rgba(242,100,48,0.6); }
+.oc-status-pill.closed{ background:rgba(217,83,83,0.10);color:#d95353;border-color:rgba(217,83,83,0.4); }
+.px-quote{ margin:2px 0 14px;padding:14px;border-radius:14px;background:var(--orange-soft);border:1.5px solid rgba(242,100,48,0.4); }
+.px-quote-top{ display:flex;justify-content:space-between;align-items:flex-end;gap:10px; }
+.px-quote-lbl{ font-size:10.5px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--text3); }
+.px-quote-amt{ font-family:var(--font-display);font-size:26px;font-weight:800;color:var(--orange);line-height:1.1; }
+.px-quote-exp{ font-size:11px;font-weight:600;color:var(--text3);text-align:right; }
+.px-quote-btns{ display:flex;gap:10px;margin-top:12px; }
+.px-btn{ flex:1;padding:12px;border-radius:12px;border:none;font:800 13.5px var(--font-display);cursor:pointer; }
+.px-btn:disabled{ opacity:.6; }
+.px-btn.accept{ background:var(--green);color:#fff; }
+.px-btn.pay{ background:var(--orange);color:#fff; }
+.px-btn.decline{ background:transparent;color:#d95353;border:1.5px solid rgba(217,83,83,0.45); }
+.px-banner{ margin-bottom:14px;padding:12px 14px;border-radius:12px;font-size:12.5px;font-weight:700;background:rgba(217,83,83,0.08);color:#d95353;border:1px solid rgba(217,83,83,0.3); }
+.px-info{ margin-bottom:14px;padding:12px 14px;border-radius:12px;font-size:12.5px;font-weight:600;background:var(--surface);color:var(--text);border:1px dashed rgba(242,100,48,0.45); }
+.px-note{ margin-top:10px;font-size:12px;font-weight:600;color:var(--text);padding:10px 12px;border-radius:10px;background:var(--bg); }
+
+/* Flow tabs */
+.flow-tabs{ margin:12px 16px 0; }
+#tabStoreOrders.active{ color:var(--accent); }
+#tabProxyOrders.active{ color:var(--orange); }
+
+#viewProxyOrders .order-card{ border-color:rgba(242,100,48,0.30); }
+body.dark-mode #viewProxyOrders .order-card{ border-color:rgba(255,140,90,0.34); }
+#viewProxyOrders .oc-item-img{ background:linear-gradient(135deg,var(--orange-soft),var(--bg)); }
+#viewProxyOrders .oc-track-link{ background:var(--orange);box-shadow:0 4px 14px rgba(242,100,48,0.22); }
+#viewProxyOrders .oc-step.done .oc-dot{ background:var(--orange); }
+#viewProxyOrders .oc-step.done .oc-line{ background:var(--orange); }
+#viewProxyOrders .oc-step.current .oc-dot{ background:var(--orange);box-shadow:0 0 0 1px var(--orange);animation:pulseDotOrange 1.6s ease-in-out infinite; }
+@keyframes pulseDotOrange{ 0%,100%{box-shadow:0 0 0 1px var(--orange)} 50%{box-shadow:0 0 0 6px var(--orange-soft)} }
+
+.oc-body{ padding:14px;display:flex;flex-direction:column;gap:16px; }
+.oc-section-label{
+  font-size:10px;font-weight:800;color:var(--text3);
+  text-transform:uppercase;letter-spacing:.04em;margin-bottom:7px;
+}
+
+/* Collapsible sub-sections (Items / Order Summary) */
+.oc-subhead{
+  display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;margin-bottom:7px;-webkit-tap-highlight-color:transparent;
+}
+.oc-subhead .oc-section-label{ margin-bottom:0; }
+.oc-subhead-right{ display:flex;align-items:center;gap:6px; }
+.oc-subtotal-preview{
+  font-size:11px;font-weight:800;color:var(--text2);
+  opacity:0;transition:opacity .2s;
+}
+.oc-subsection.collapsed .oc-subtotal-preview{ opacity:1; }
+.oc-sub-chevron{
+  width:14px;height:14px;color:var(--text3);flex-shrink:0;
+  transition:transform .25s ease;
+}
+.oc-subsection.collapsed .oc-sub-chevron{ transform:rotate(-90deg); }
+.oc-subsection-content{
+  display:grid;grid-template-rows:1fr;
+  transition:grid-template-rows .28s ease;
+}
+.oc-subsection.collapsed .oc-subsection-content{ grid-template-rows:0fr; }
+.oc-subsection-content > div{ overflow:hidden; }
+
+/* Customer */
+.oc-customer-card{
+  background:var(--surface2);border-radius:var(--radius-sm);
+  padding:11px 12px;display:flex;flex-direction:column;gap:8px;
+}
+.oc-customer-row{ display:flex;align-items:center;gap:9px; }
+.oc-customer-row svg{ width:15px;height:15px;color:var(--text3);flex-shrink:0; }
+.oc-customer-row span{ font-size:12.5px;font-weight:700;color:var(--text); }
+.oc-customer-row.addr span{ font-weight:600;color:var(--text2);line-height:1.4; }
+
+/* Products */
+.oc-item-row{ display:flex;gap:10px;align-items:flex-start; }
+.oc-item-row + .oc-item-row{ margin-top:12px; }
+.oc-item-img{
+  width:52px;height:52px;border-radius:12px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent-soft),var(--bg));
+  display:flex;align-items:center;justify-content:center;
+}
+.oc-item-img svg{ width:24px;height:24px;color:var(--text3);opacity:.3; }
+.oc-item-name-row{ display:flex;align-items:center;gap:6px; }
+.oc-cat-badge{
+  width:16px;height:16px;border-radius:5px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.oc-cat-badge svg{ width:9px;height:9px;color:#fff; }
+.oc-cat-badge.cat-supplement{ background:linear-gradient(135deg,#009b72,#00704f); }
+.oc-cat-badge.cat-gadget{ background:linear-gradient(135deg,#0EA5E9,#0284C7); }
+.oc-cat-badge.cat-cosmetic{ background:linear-gradient(135deg,#EC4899,#DB2777); }
+.oc-cat-badge.cat-clothing{ background:linear-gradient(135deg,#6761a8,#4a4480); }
+.oc-cat-badge.cat-general{ background:linear-gradient(135deg,#64748B,#475569); }
+.oc-item-name{ font-size:12.5px;font-weight:700;color:var(--text);line-height:1.3; }
+.oc-item-sub{ font-size:10.5px;color:var(--text3);font-weight:600;margin-top:2px;margin-left:22px; }
+.oc-item-math{ text-align:right;flex-shrink:0; }
+.oc-item-qtyprice{ font-size:10px;color:var(--text3);font-weight:600;white-space:nowrap; }
+.oc-item-linetotal{ font-size:12.5px;font-weight:800;color:var(--text);margin-top:1px; }
+
+/* Math */
+.oc-math-card{
+  background:var(--surface2);border-radius:var(--radius-sm);
+  border:1px solid var(--border-strong);
+  box-shadow:inset 0 1px 2px rgba(11,18,32,0.04);
+  padding:11px 12px;display:flex;flex-direction:column;gap:7px;
+  margin-top:14px;
+}
+.oc-math-row{ display:flex;justify-content:space-between;align-items:center; }
+.oc-math-row span:first-child{ font-size:12px;font-weight:600;color:var(--text2); }
+.oc-math-row span:last-child{ font-size:12px;font-weight:700;color:var(--text); }
+.oc-math-row.discount span:last-child{ color:var(--green); }
+.oc-math-row.total{ padding-top:8px;border-top:1px solid var(--border-strong); }
+.oc-math-row.total span:first-child{ font-size:13px;font-weight:800;color:var(--text); }
+.oc-math-row.total span:last-child{ font-family:var(--font-display);font-size:15px;font-weight:800; }
+
+/* Timeline */
+.oc-progress{ display:flex;align-items:center;gap:0; }
+.oc-step{ flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;position:relative; }
+.oc-dot{
+  width:9px;height:9px;border-radius:50%;background:var(--border-strong);
+  border:2px solid var(--surface);box-shadow:0 0 0 1px var(--border-strong);z-index:1;
+}
+.oc-step.done .oc-dot{ background:var(--accent);box-shadow:0 0 0 1px var(--accent); }
+.oc-line{ position:absolute;top:4px;left:-50%;width:100%;height:2px;background:var(--border-strong);z-index:0; }
+.oc-step:first-child .oc-line{ display:none; }
+.oc-step.done .oc-line{ background:var(--accent); }
+.oc-step.current .oc-dot{ background:var(--accent);box-shadow:0 0 0 1px var(--accent);animation:pulseDot 1.6s ease-in-out infinite; }
+.oc-step.delivered.done .oc-dot{ background:var(--green);box-shadow:0 0 0 1px var(--green);animation:none; }
+@keyframes pulseDot{ 0%,100%{box-shadow:0 0 0 1px var(--accent)} 50%{box-shadow:0 0 0 6px var(--accent-soft)} }
+.oc-step-label{
+  font-size:8px;font-weight:700;color:var(--text3);text-align:center;
+  letter-spacing:.02em;text-transform:uppercase;
+}
+.oc-step.done .oc-step-label{ color:var(--text2); }
+
+/* Vertical stepper (Buy For Me timeline: 7 stages) */
+.oc-vprogress{ display:flex;flex-direction:column; }
+.oc-vstep{ display:flex;gap:12px;position:relative; }
+.oc-vstep-rail{ display:flex;flex-direction:column;align-items:center;width:16px;flex-shrink:0; }
+.oc-vdot{
+  width:10px;height:10px;border-radius:50%;background:var(--border-strong);
+  border:2px solid var(--surface);box-shadow:0 0 0 1px var(--border-strong);
+  flex-shrink:0;margin-top:2px;z-index:1;
+}
+.oc-vstep.done .oc-vdot{ background:var(--orange);box-shadow:0 0 0 1px var(--orange); }
+.oc-vstep.current .oc-vdot{ background:var(--orange);box-shadow:0 0 0 1px var(--orange);animation:pulseDotOrange 1.6s ease-in-out infinite; }
+.oc-vstep.delivered.done .oc-vdot{ background:var(--green);box-shadow:0 0 0 1px var(--green);animation:none; }
+.oc-vline{ width:2px;flex:1;background:var(--border-strong);margin:2px 0;min-height:18px; }
+.oc-vstep.done .oc-vline{ background:var(--orange); }
+.oc-vstep:last-child .oc-vline{ display:none; }
+.oc-vstep-body{ padding-bottom:16px;flex:1;min-width:0; }
+.oc-vstep:last-child .oc-vstep-body{ padding-bottom:0; }
+.oc-vstep-title{ font-size:12px;font-weight:700;color:var(--text3); }
+.oc-vstep.done .oc-vstep-title{ color:var(--text); }
+.oc-vstep.current .oc-vstep-title{ color:var(--orange); }
+.oc-vstep-day{ font-size:10.5px;font-weight:600;color:var(--text3);margin-top:1px; }
+
+.oc-track-link{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);
+  padding:11px;font-family:var(--font-display);font-size:12.5px;font-weight:800;
+  cursor:pointer;box-shadow:0 4px 14px rgba(10,155,220,0.22);
+}
+.oc-track-link:active{ transform:scale(.98); }
+
+/* Footer nav */
+.s-nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:50;height:var(--bottom-nav-h);
+  background:var(--surface);border-top:1px solid var(--border);
+  backdrop-filter:blur(20px) saturate(1.2);
+  display:flex;align-items:center;justify-content:space-around;padding:0 8px 8px;
+}
+.s-nav-item{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  color:var(--text3);font-size:10px;font-weight:600;cursor:pointer;
+  transition:color .2s;padding:6px 12px;border-radius:10px;
+  text-decoration:none;position:relative;
+}
+.s-nav-item.active{ color:var(--accent); }
+.s-nav-item svg{ width:22px;height:22px; }
+.s-nav-badge{
+  position:absolute;top:0;right:6px;min-width:16px;height:16px;padding:0 4px;
+  border-radius:9px;background:#e64848;color:#fff;font-size:9px;font-weight:700;
+  line-height:16px;text-align:center;align-items:center;justify-content:center;
+}
+.s-nav-badge{display:flex;opacity:0;transform:scale(.4);pointer-events:none;overflow:hidden;box-shadow:0 2px 6px rgba(230,72,72,.35);transition:opacity .22s ease,transform .38s cubic-bezier(.2,.9,.3,1.3)}
+.s-nav-badge.show{opacity:1;transform:scale(1)}
+.s-nav-badge-num{display:block;font:inherit;line-height:inherit;will-change:transform,opacity}
+@media (prefers-reduced-motion:reduce){.s-nav-badge{transition:opacity .01s}}
+</style>
+<script>window.sbClient={auth:{getSession:async()=>({data:{session:null}}),onAuthStateChange(){return{data:{subscription:{unsubscribe(){}}}}}},from(){const q={select(){return q},order(){return Promise.resolve({data:[],error:null})}};return q},rpc:async()=>({data:null,error:null})};window.svInitHeaderAuth=function(){};</script>
+<style>.so-note{margin:10px 0 0;padding:9px 12px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;line-height:1.5;color:var(--text2);background:var(--orange-soft);border:1px solid rgba(242,100,48,0.35)}
+.so-note b{color:var(--text);font-weight:800}
+.so-note.info{background:var(--accent-soft);border-color:rgba(10,155,220,0.35)}
+.so-note.bad{background:rgba(217,83,83,0.10);border-color:rgba(217,83,83,0.35)}
+.so-btn{margin-top:8px;display:block;width:100%;border:0;border-radius:var(--radius-sm);padding:9px 12px;font-family:var(--font-display);font-weight:800;font-size:12.5px;letter-spacing:.2px;background:var(--accent);color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .15s ease}
+.so-btn:active{transform:scale(.98)}
+
+.so-note.ok{background:var(--green-soft);border-color:rgba(10,155,114,0.35)}
+.oc-status-pill.unpaid,.oc-status-pill.awaiting_payment{ background:var(--orange-soft);color:var(--orange);border-color:rgba(242,100,48,0.4); }
+.oc-status-pill.verifying,.oc-status-pill.cod_pending{ background:var(--accent-soft);color:var(--accent);border-color:rgba(10,155,220,0.4); }
+.oc-status-pill.paid{ background:var(--green-soft);color:var(--green);border-color:rgba(10,155,114,0.4); }
+.oc-status-pill.cancelled{ background:rgba(217,83,83,0.10);color:#d95353;border-color:rgba(217,83,83,0.4); }
+.oc-status-date .tm{color:var(--yellow);font-weight:800}
+.oc-step.current .oc-line{background:var(--accent)}
+.oc-body{gap:14px} .oc-body .so-note{margin-top:0}
+.hd-note{font-size:11px;font-weight:700;color:var(--text3);padding:10px 4px 0;letter-spacing:.3px;text-transform:uppercase}
+</style></head>
+<body data-page="orders">
+
+<svg style="position:absolute;width:0;height:0" aria-hidden="true">
+  <symbol id="cat-icon-supplement" viewBox="0 0 512 512">
+    <g transform="translate(-1,-1)">
+      <path fill="currentColor" stroke="currentColor" stroke-width="11" stroke-linejoin="round" d="M357.4,136.09v-17.623H383c13.653,0,25.6-11.093,25.6-25.6V24.6C408.6,10.947,397.507-1,383-1H127
+        c-13.653,0-25.6,11.093-25.6,25.6v68.267c0,13.653,11.093,25.6,25.6,25.6h25.6v17.623c-33.555,4.235-59.733,33.054-59.733,67.71
+        v25.6v187.733v25.6c0,37.547,30.72,68.267,68.267,68.267h187.733c37.547,0,68.267-30.72,68.267-68.267v-25.6V229.4v-25.6
+        C417.133,169.144,390.955,140.325,357.4,136.09z M118.467,92.867v-8.533H203.8c4.267,0,8.533-3.413,8.533-8.533
+        s-3.413-8.533-8.533-8.533h-85.333V50.2H152.6c4.267,0,8.533-3.413,8.533-8.533s-3.413-8.533-8.533-8.533h-34.133V24.6
+        c0-4.267,3.413-8.533,8.533-8.533h256c4.267,0,8.533,3.413,8.533,8.533v8.533H306.2c-5.12,0-8.533,3.413-8.533,8.533
+        c0,4.267,3.413,8.533,8.533,8.533h85.333v17.067H357.4c-4.267,0-8.533,3.413-8.533,8.533c0,4.267,3.413,8.533,8.533,8.533h34.133
+        v8.533c0,4.267-3.413,8.533-8.533,8.533h-34.133H161.133H127C122.733,101.4,118.467,97.987,118.467,92.867z M340.333,118.467
+        v17.067H169.667v-17.067H340.333z M161.133,152.6h187.733c28.16,0,51.2,23.04,51.2,51.2v17.067H109.933V203.8
+        C109.933,175.64,132.973,152.6,161.133,152.6z M400.067,408.6H109.933V237.933h290.133V408.6z M348.867,493.933H161.133
+        c-28.16,0-51.2-23.04-51.2-51.2v-17.067h290.133v17.067C400.067,470.893,377.027,493.933,348.867,493.933z"/>
+      <path fill="currentColor" stroke="currentColor" stroke-width="11" stroke-linejoin="round" d="M220.867,332.653h49.493l-39.253,45.227c-3.413,3.413-2.56,8.533,0.853,11.947c1.707,0.853,4.267,1.707,5.973,1.707
+        c2.56,0,5.12-0.853,6.827-2.56l51.2-59.733c1.707-2.56,2.56-5.973,0.853-9.387s-4.267-5.12-7.68-5.12H239.64l38.4-45.227
+        c3.413-3.413,2.56-8.533-0.853-11.947s-8.533-2.56-11.947,0.853l-51.2,59.733c-1.707,2.56-2.56,5.973-0.853,9.387
+        S217.453,332.653,220.867,332.653z"/>
+    </g>
+  </symbol>
+</svg>
+
+<header class="s-header">
+  <div class="header-back" onclick="window.location.href='store.html'" aria-label="Back">
+    <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+  </div>
+  <div class="s-header-title">
+    <h1>Orders</h1>
+  </div>
+  <div class="header-right">
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+      <svg class="icon-sun" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+      <svg class="icon-moon" viewBox="0 0 24 24">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
+    <button class="hcart" id="headerAccountBtn" aria-label="Account" onclick="window.location.href='login.html'">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="flow-tabs" id="ordersFlowTabs">
+  <button class="flow-tab active" id="tabStoreOrders" type="button">Store Orders</button>
+  <button class="flow-tab" id="tabProxyOrders" type="button">Buy For Me Orders</button>
+</div>
+
+<div id="viewStoreOrders"><div class="order-list"><div class="hd-note">1 · Awaiting payment</div><div class="order-card"><div class="oc-head"><div class="oc-head-left"><div class="oc-id-row"><span class="oc-id-label">Order ID</span><div class="oc-id store">SV-1036</div></div>
+<div class="oc-meta">Order created <span class="oc-meta-date">3 Oct 2026</span></div></div>
+<div class="oc-head-right"><div class="oc-status-wrap"><span class="oc-status-pill awaiting_payment">Awaiting payment</span><span class="oc-status-date">Pay within <b class="tm">18m</b></span></div><svg class="oc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div></div><div class="oc-body"><div class="so-note" style="margin-top:0">Waiting for your payment. Your voucher is held for you until <b>4:26 PM</b>. Go back to checkout to pay.<button class="so-btn">Pay now</button></div><div class="oc-customer-wrap"><div class="oc-section-label">Customer</div><div class="oc-customer-card">
+<div class="oc-customer-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Rafiq Ahmed</span></div><div class="oc-customer-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span>+880 1712-345678</span></div>
+<div class="oc-customer-row addr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span>House 14, Road 7, Dhanmondi, Dhaka</span></div></div></div><div class="oc-subsection"><div class="oc-subhead" onclick="this.closest('.oc-subsection').classList.toggle('collapsed')"><div class="oc-section-label">Items &amp; Summary</div><div class="oc-subhead-right"><span class="oc-subtotal-preview">৳8,400</span><svg class="oc-sub-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="oc-subsection-content"><div><div class="oc-item-row"><div class="oc-item-img"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div><div style="flex:1;min-width:0"><div class="oc-item-name-row"><span class="oc-cat-badge cat-supplement"><svg viewBox="0 0 512 512"><use href="#cat-icon-supplement"/></svg></span><div class="oc-item-name">Optimum Nutrition Gold Standard 100% Whey</div></div><div class="oc-item-sub">2 lb · Chocolate</div></div>
+<div class="oc-item-math"><div class="oc-item-qtyprice">1 × ৳4,200</div><div class="oc-item-linetotal">৳4,200</div></div></div><div class="oc-item-row"><div class="oc-item-img"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div><div style="flex:1;min-width:0"><div class="oc-item-name-row"><span class="oc-cat-badge cat-supplement"><svg viewBox="0 0 512 512"><use href="#cat-icon-supplement"/></svg></span><div class="oc-item-name">Dymatize Creatine Monohydrate</div></div><div class="oc-item-sub">300g</div></div>
+<div class="oc-item-math"><div class="oc-item-qtyprice">2 × ৳2,100</div><div class="oc-item-linetotal">৳4,200</div></div></div>
+<div class="oc-math-card"><div class="oc-math-row"><span>Subtotal</span><span>৳8,400</span></div><div class="oc-math-row"><span>Shipping</span><span>৳120</span></div><div class="oc-math-row discount"><span>Discount (FREESHIP)</span><span>−৳120</span></div><div class="oc-math-row total"><span>Total</span><span>৳8,400</span></div></div></div></div></div><button class="oc-track-link">Need Help With This Order?</button></div></div><div class="hd-note">2 · Unpaid</div><div class="order-card"><div class="oc-head"><div class="oc-head-left"><div class="oc-id-row"><span class="oc-id-label">Order ID</span><div class="oc-id store">SV-1029</div></div>
+<div class="oc-meta">Order created <span class="oc-meta-date">3 Oct 2026</span></div></div>
+<div class="oc-head-right"><div class="oc-status-wrap"><span class="oc-status-pill unpaid">Unpaid</span><span class="oc-status-date">Cancels in <b class="tm">4h 59m</b></span></div><svg class="oc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div></div><div class="oc-body"><div class="so-note" style="margin-top:0">Not paid yet. This order will be cancelled automatically in <b>4h 59m</b>. Already sent the money? Contact us with your transaction ID.<button class="so-btn">Pay again</button></div><div class="oc-customer-wrap"><div class="oc-section-label">Customer</div><div class="oc-customer-card">
+<div class="oc-customer-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Rafiq Ahmed</span></div><div class="oc-customer-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span>+880 1712-345678</span></div>
+<div class="oc-customer-row addr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span>House 14, Road 7, Dhanmondi, Dhaka</span></div></div></div><div class="oc-subsection"><div class="oc-subhead" onclick="this.closest('.oc-subsection').classList.toggle('collapsed')"><div class="oc-section-label">Items &amp; Summary</div><div class="oc-subhead-right"><span class="oc-subtotal-preview">৳8,400</span><svg class="oc-sub-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="oc-subsection-content"><div><div class="oc-item-row"><div class="oc-item-img"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div><div style="flex:1;min-width:0"><div class="oc-item-name-row"><span class="oc-cat-badge cat-supplement"><svg viewBox="0 0 512 512"><use href="#cat-icon-supplement"/></svg></span><div class="oc-item-name">Optimum Nutrition Gold Standard 100% Whey</div></div><div class="oc-item-sub">2 lb · Chocolate</div></div>
+<div class="oc-item-math"><div class="oc-item-qtyprice">1 × ৳4,200</div><div class="oc-item-linetotal">৳4,200</div></div></div><div class="oc-item-row"><div class="oc-item-img"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div><div style="flex:1;min-width:0"><div class="oc-item-name-row"><span class="oc-cat-badge cat-supplement"><svg viewBox="0 0 512 512"><use href="#cat-icon-supplement"/></svg></span><div class="oc-item-name">Dymatize Creatine Monohydrate</div></div><div class="oc-item-sub">300g</div></div>
+<div class="oc-item-math"><div class="oc-item-qtyprice">2 × ৳2,100</div><div class="oc-item-linetotal">৳4,200</div></div></div>
+<div class="oc-math-card"><div class="oc-math-row"><span>Subtotal</span><span>৳8,400</span></div><div class="oc-math-row"><span>Shipping</span><span>৳120</span></div><div class="oc-math-row discount"><span>Discount (FREESHIP)</span><span>−৳120</span></div><div class="oc-math-row total"><span>Total</span><span>৳8,400</span></div></div></div></div></div><button class="oc-track-link">Need Help With This Order?</button></div></div><div class="hd-note">3 · Verifying payment</div><div class="order-card"><div class="oc-head"><div class="oc-head-left"><div class="oc-id-row"><span class="oc-id-label">Order ID</span><div class="oc-id store">SV-1034</div></div>
+<div class="oc-meta">Order created <span class="oc-meta-date">26 Sept 2026</span></div></div>
+<div class="oc-head-right"><div class="oc-status-wrap"><span class="oc-status-pill verifying">Verifying payment</span><span class="oc-status-date">Confirming shortly</span></div><svg class="oc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div></div><div class="oc-body"><div class="so-note info" style="margin-top:0">We received your transaction ID (DIQ3WOW6UJ) and will confirm your payment shortly.</div><div><div class="oc-section-label">Payment</div><div class="oc-math-card" style="margin-top:0"><div class="oc-math-row"><span>Method</span><span>bKash</span></div><div class="oc-math-row"><span>Transaction ID</span><span>DIQ3WOW6UJ</span></div><div class="oc-math-row"><span>Status</span><span>Verifying</span></div></div></div><div class="oc-customer-wrap"><div class="oc-section-label">Customer</div><div class="oc-customer-card">
+<div class="oc-customer-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Rafiq Ahmed</span></div><div class="oc-customer-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span>+880 1712-345678</span></div>
+<div class="oc-customer-row addr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span>House 14, Road 7, Dhanmondi, Dhaka</span></div></div></div><div class="oc-subsection"><div class="oc-subhead" onclick="this.closest('.oc-subsection').classList.toggle('collapsed')"><div class="oc-section-label">Items &amp; Summary</div><div class="oc-subhead-right"><span class="oc-subtotal-preview">৳8,400</span><svg class="oc-sub-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="oc-subsection-content"><div><div class="oc-item-row"><div class="oc-item-img"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div><div style="flex:1;min-width:0"><div class="oc-item-name-row"><span class="oc-cat-badge cat-supplement"><svg viewBox="0 0 512 512"><use href="#cat-icon-supplement"/></svg></span><div class="oc-item-name">Optimum Nutrition Gold Standard 100% Whey</div></div><div class="oc-item-sub">2 lb · Chocolate</div></div>
+<div class="oc-item-math"><div class="oc-item-qtyprice">1 × ৳4,200</div><div class="oc-item-linetotal">৳4,200</div></div></div><div class="oc-item-row"><div class="oc-item-img"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div><div style="flex:1;min-width:0"><div class="oc-item-name-row"><span class="oc-cat-badge cat-supplement"><svg viewBox="0 0 512 512"><use href="#cat-icon-supplement"/></svg></span><div class="oc-item-name">Dymatize Creatine Monohydrate</div></div><div class="oc-item-sub">300g</div></div>
+<div class="oc-item-math"><div class="oc-item-qtyprice">2 × ৳2,100</div><div class="oc-item-linetotal">৳4,200</div></div></div>
+<div class="oc-math-card"><div class="oc-math-row"><span>Subtotal</span><span>৳8,400</span></div><div class="oc-math-row"><span>Shipping</span><span>৳120</span></div><div class="oc-math-row discount"><span>Discount (FREESHIP)</span><span>−৳120</span></div><div class="oc-math-row total"><span>Total</span><span>৳8,400</span></div></div></div></div></div><button class="oc-track-link">Need Help With This Order?</button></div></div><div class="hd-note">4 · Cash on delivery (pending)</div><div class="order-card"><div class="oc-head"><div class="oc-head-left"><div class="oc-id-row"><span class="oc-id-label">Order ID</span><div class="oc-id store">SV-1027</div></div>
+<div class="oc-meta">Order created <span class="oc-meta-date">3 Oct 2026</span></div></div>
+<div class="oc-head-right"><div class="oc-status-wrap"><span class="oc-status-pill cod_pending">Pending (COD)</span><span class="oc-status-date">Awaiting confirmation</span></div><svg class="oc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div></div><div class="oc-body"><div class="so-note info" style="margin-top:0">Cash on delivery. We will confirm this order with you.</div><div><div class="oc-section-label">Payment</div><div class="oc-math-card" style="margin-top:0"><div class="oc-math-row"><span>Method</span><span>Cash on delivery</span></div><div class="oc-math-row"><span>Pay on delivery</span><span>৳8,400</span></div></div></div><div class="oc-customer-wrap"><div class="oc-section-label">Customer</div><div class="oc-customer-card">
+<div class="oc-customer-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Rafiq Ahmed</span></div><div class="oc-customer-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span>+880 1712-345678</span></div>
+<div class="oc-customer-row addr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span>House 14, Road 7, Dhanmondi, Dhaka</span></div></div></div><div class="oc-subsection"><div class="oc-subhead" onclick="this.closest('.oc-subsection').classList.toggle('collapsed')"><div class="oc-section-label">Items &amp; Summary</div><div class="oc-subhead-right"><span class="oc-subtotal-preview">৳8,400</span><svg class="oc-sub-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="oc-subsection-content"><div><div class="oc-item-row"><div class="oc-item-img"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div><div style="flex:1;min-width:0"><div class="oc-item-name-row"><span class="oc-cat-badge cat-supplement"><svg viewBox="0 0 512 512"><use href="#cat-icon-supplement"/></svg></span><div class="oc-item-name">Optimum Nutrition Gold Standard 100% Whey</div></div><div class="oc-item-sub">2 lb · Chocolate</div></div>
+<div class="oc-item-math"><div class="oc-item-qtyprice">1 × ৳4,200</div><div class="oc-item-linetotal">৳4,200</div></div></div><div class="oc-item-row"><div class="oc-item-img"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div><div style="flex:1;min-width:0"><div class="oc-item-name-row"><span class="oc-cat-badge cat-supplement"><svg viewBox="0 0 512 512"><use href="#cat-icon-supplement"/></svg></span><div class="oc-item-name">Dymatize Creatine Monohydrate</div></div><div class="oc-item-sub">300g</div></div>
+<div class="oc-item-math"><div class="oc-item-qtyprice">2 × ৳2,100</div><div class="oc-item-linetotal">৳4,200</div></div></div>
+<div class="oc-math-card"><div class="oc-math-row"><span>Subtotal</span><span>৳8,400</span></div><div class="oc-math-row"><span>Shipping</span><span>৳120</span></div><div class="oc-math-row discount"><span>Discount (FREESHIP)</span><span>−৳120</span></div><div class="oc-math-row total"><span>Total</span><span>৳8,400</span></div></div></div></div></div><button class="oc-track-link">Need Help With This Order?</button></div></div><div class="hd-note">5 · Paid</div><div class="order-card"><div class="oc-head"><div class="oc-head-left"><div class="oc-id-row"><span class="oc-id-label">Order ID</span><div class="oc-id store">SV-1031</div></div>
+<div class="oc-meta">Order created <span class="oc-meta-date">20 Sept 2026</span></div></div>
+<div class="oc-head-right"><div class="oc-status-wrap"><span class="oc-status-pill paid">Paid</span><span class="oc-status-date">Paid 21 Sept 2026</span></div><svg class="oc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div></div><div class="oc-body"><div class="so-note ok" style="margin-top:0">Payment received. We are getting your order ready.</div><div><div class="oc-section-label">Payment</div><div class="oc-math-card" style="margin-top:0"><div class="oc-math-row"><span>Method</span><span>bKash</span></div><div class="oc-math-row"><span>Transaction ID</span><span>DIQ3WOW6UJ</span></div><div class="oc-math-row"><span>Paid on</span><span>21 Sept 2026</span></div></div></div><div class="oc-customer-wrap"><div class="oc-section-label">Customer</div><div class="oc-customer-card">
+<div class="oc-customer-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Rafiq Ahmed</span></div><div class="oc-customer-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span>+880 1712-345678</span></div>
+<div class="oc-customer-row addr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span>House 14, Road 7, Dhanmondi, Dhaka</span></div></div></div><div class="oc-subsection"><div class="oc-subhead" onclick="this.closest('.oc-subsection').classList.toggle('collapsed')"><div class="oc-section-label">Items &amp; Summary</div><div class="oc-subhead-right"><span class="oc-subtotal-preview">৳8,400</span><svg class="oc-sub-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="oc-subsection-content"><div><div class="oc-item-row"><div class="oc-item-img"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div><div style="flex:1;min-width:0"><div class="oc-item-name-row"><span class="oc-cat-badge cat-supplement"><svg viewBox="0 0 512 512"><use href="#cat-icon-supplement"/></svg></span><div class="oc-item-name">Optimum Nutrition Gold Standard 100% Whey</div></div><div class="oc-item-sub">2 lb · Chocolate</div></div>
+<div class="oc-item-math"><div class="oc-item-qtyprice">1 × ৳4,200</div><div class="oc-item-linetotal">৳4,200</div></div></div><div class="oc-item-row"><div class="oc-item-img"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div><div style="flex:1;min-width:0"><div class="oc-item-name-row"><span class="oc-cat-badge cat-supplement"><svg viewBox="0 0 512 512"><use href="#cat-icon-supplement"/></svg></span><div class="oc-item-name">Dymatize Creatine Monohydrate</div></div><div class="oc-item-sub">300g</div></div>
+<div class="oc-item-math"><div class="oc-item-qtyprice">2 × ৳2,100</div><div class="oc-item-linetotal">৳4,200</div></div></div>
+<div class="oc-math-card"><div class="oc-math-row"><span>Subtotal</span><span>৳8,400</span></div><div class="oc-math-row"><span>Shipping</span><span>৳120</span></div><div class="oc-math-row discount"><span>Discount (FREESHIP)</span><span>−৳120</span></div><div class="oc-math-row total"><span>Total</span><span>৳8,400</span></div></div></div></div></div><div><div class="oc-section-label">Delivery Timeline</div><div class="oc-progress"><div class="oc-step done current"><div class="oc-line"></div><div class="oc-dot"></div><div class="oc-step-label">Ordered</div></div><div class="oc-step "><div class="oc-line"></div><div class="oc-dot"></div><div class="oc-step-label">Processing</div></div><div class="oc-step "><div class="oc-line"></div><div class="oc-dot"></div><div class="oc-step-label">Shipped</div></div><div class="oc-step "><div class="oc-line"></div><div class="oc-dot"></div><div class="oc-step-label">Delivered</div></div></div></div><button class="oc-track-link">Need Help With This Order?</button></div></div><div class="hd-note">6 · Cancelled</div><div class="order-card"><div class="oc-head"><div class="oc-head-left"><div class="oc-id-row"><span class="oc-id-label">Order ID</span><div class="oc-id store">SV-1035</div></div>
+<div class="oc-meta">Order created <span class="oc-meta-date">30 Sept 2026</span></div></div>
+<div class="oc-head-right"><div class="oc-status-wrap"><span class="oc-status-pill cancelled">Cancelled</span><span class="oc-status-date">Cancelled 30 Sept 2026</span></div><svg class="oc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div></div><div class="oc-body"><div class="so-note bad" style="margin-top:0">Cancelled: Not paid in time.<button class="so-btn">Order again</button></div><div class="oc-subsection"><div class="oc-subhead" onclick="this.closest('.oc-subsection').classList.toggle('collapsed')"><div class="oc-section-label">Items &amp; Summary</div><div class="oc-subhead-right"><span class="oc-subtotal-preview">৳8,400</span><svg class="oc-sub-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="oc-subsection-content"><div><div class="oc-item-row"><div class="oc-item-img"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div><div style="flex:1;min-width:0"><div class="oc-item-name-row"><span class="oc-cat-badge cat-supplement"><svg viewBox="0 0 512 512"><use href="#cat-icon-supplement"/></svg></span><div class="oc-item-name">Optimum Nutrition Gold Standard 100% Whey</div></div><div class="oc-item-sub">2 lb · Chocolate</div></div>
+<div class="oc-item-math"><div class="oc-item-qtyprice">1 × ৳4,200</div><div class="oc-item-linetotal">৳4,200</div></div></div><div class="oc-item-row"><div class="oc-item-img"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div><div style="flex:1;min-width:0"><div class="oc-item-name-row"><span class="oc-cat-badge cat-supplement"><svg viewBox="0 0 512 512"><use href="#cat-icon-supplement"/></svg></span><div class="oc-item-name">Dymatize Creatine Monohydrate</div></div><div class="oc-item-sub">300g</div></div>
+<div class="oc-item-math"><div class="oc-item-qtyprice">2 × ৳2,100</div><div class="oc-item-linetotal">৳4,200</div></div></div>
+<div class="oc-math-card"><div class="oc-math-row"><span>Subtotal</span><span>৳8,400</span></div><div class="oc-math-row"><span>Shipping</span><span>৳120</span></div><div class="oc-math-row discount"><span>Discount (FREESHIP)</span><span>−৳120</span></div><div class="oc-math-row total"><span>Total</span><span>৳8,400</span></div></div></div></div></div><button class="oc-track-link">Need Help With This Order?</button></div></div></div></div>
+<div id="viewProxyOrders" style="display:none">
+<div class="order-list" id="proxyList"><div class="px-state">Loading your requests…</div></div>
+</div>
+
+<nav class="s-nav" id="svFooterNav">
+  <a href="store.html" class="s-nav-item" data-page="store">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8.5 3.8 3h16.4L22 8.5"/><path d="M2 8.5a2.5 2.5 0 0 0 5 0 2.5 2.5 0 0 0 5 0 2.5 2.5 0 0 0 5 0 2.5 2.5 0 0 0 5 0"/><path d="M3.5 8.5V20a1 1 0 0 0 1 1h15a1 1 0 0 0 1-1V8.5"/><path d="M8.5 21v-6a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v6"/></svg>
+    Store
+  </a>
+  <a href="buy_for_me.html" class="s-nav-item" data-page="buy_for_me">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+    Buy For Me
+  </a>
+  <a href="cart.html" class="s-nav-item" data-page="cart">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+    Cart
+    <span class="s-nav-badge" id="svNavCartBadge" aria-live="polite"></span>
+  </a>
+  <a href="orders.html" class="s-nav-item active" data-page="orders">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+    Orders
+  </a>
+</nav>
+
+<script>
+const S = { theme: localStorage.getItem('sv-theme') || 'light' };
+function applyTheme(){
+  document.body.classList.toggle('dark-mode', S.theme === 'dark');
+  const themeBtn = document.getElementById('themeToggle');
+  if(themeBtn) themeBtn.classList.toggle('dark', S.theme === 'dark');
+  localStorage.setItem('sv-theme', S.theme);
+}
+const themeToggleBtn2 = document.getElementById('themeToggle');
+if(themeToggleBtn2) themeToggleBtn2.addEventListener('click', () => {
+  S.theme = S.theme === 'light' ? 'dark' : 'light';
+  applyTheme();
+});
+applyTheme();
+
+var __svBadgeLast = 0;
+  function svRefreshCartBadge(){
+    try{
+      var cart = JSON.parse(localStorage.getItem('sv-cart-internal') || '[]');
+      var count = Array.isArray(cart) ? cart.reduce(function(n,i){return n+(i.qty||1);},0) : 0;
+      var badge = document.getElementById('svNavCartBadge');
+      if(!badge) return;
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var num = badge.firstElementChild;
+      if(!num || !num.classList.contains('s-nav-badge-num')){
+        badge.textContent = '';
+        num = document.createElement('b');
+        num.className = 's-nav-badge-num';
+        badge.appendChild(num);
+      }
+      if(count > 0){
+        var label = count > 99 ? '99+' : String(count);
+        var wasShown = badge.classList.contains('show');
+        var prev = __svBadgeLast;
+        badge.__label = label;
+        if(num.textContent !== label){
+          if(wasShown && !reduce && num.animate){
+            var dir = count > prev ? 1 : -1;
+            var out = num.animate([{transform:'translateY(0)',opacity:1},{transform:'translateY('+(-7*dir)+'px)',opacity:0}],{duration:110,easing:'ease-in',fill:'forwards'});
+            out.onfinish = function(){
+              num.textContent = badge.__label;
+              var inn = num.animate([{transform:'translateY('+(7*dir)+'px)',opacity:0},{transform:'translateY(0)',opacity:1}],{duration:170,easing:'cubic-bezier(.2,.9,.3,1.2)'});
+              inn.onfinish = function(){ out.cancel(); };
+            };
+            if(count > prev && badge.animate){
+              badge.animate([{transform:'scale(1)'},{transform:'scale(1.28)',offset:.4},{transform:'scale(1)'}],{duration:340,easing:'ease-out'});
+            }
+          } else { num.textContent = label; }
+        }
+        if(!wasShown) requestAnimationFrame(function(){ badge.classList.add('show'); });
+      } else {
+        badge.classList.remove('show');
+      }
+      __svBadgeLast = count;
+    }catch(e){}
+  }
+  window.svRefreshCartBadge = svRefreshCartBadge;
+  svRefreshCartBadge();
+  window.addEventListener('pageshow', svRefreshCartBadge);
+  window.addEventListener('storage', function(e){ if(!e.key || e.key === 'sv-cart-internal') svRefreshCartBadge(); });
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden) svRefreshCartBadge(); });
+
+const tabStore = document.getElementById('tabStoreOrders');
+const tabProxy = document.getElementById('tabProxyOrders');
+const viewStore = document.getElementById('viewStoreOrders');
+const viewProxy = document.getElementById('viewProxyOrders');
+
+tabStore.addEventListener('click', () => {
+  tabStore.classList.add('active'); tabProxy.classList.remove('active');
+  viewStore.style.display = ''; viewProxy.style.display = 'none';
+  document.getElementById('ordersFlowTabs').classList.remove('flow-proxy');
+});
+tabProxy.addEventListener('click', () => {
+  tabProxy.classList.add('active'); tabStore.classList.remove('active');
+  viewProxy.style.display = ''; viewStore.style.display = 'none';
+  document.getElementById('ordersFlowTabs').classList.add('flow-proxy');
+});
+svInitHeaderAuth('headerAccountBtn');
+
+/* ===== Buy For Me orders (live) =====
+   PX_FLOW is the timeline. Not final: edit titles / order / keys here only.
+   Keys must match proxy_requests.status values. */
+const PX_FLOW = [
+  { k:'pending_quote', t:'Request sent' },
+  { k:'quoted',        t:'Quote ready' },
+  { k:'approved',      t:'Order confirmed' },
+  { k:'paid',          t:'Payment received' },
+  { k:'purchasing',    t:'Purchasing' },
+  { k:'ordered',       t:'Ordered from store' },
+  { k:'shipped_intl',  t:'Shipped to Bangladesh' },
+  { k:'arrived_bd',    t:'Arrived in Bangladesh' },
+  { k:'delivered',     t:'Delivered' }
+];
+const PX_PILL = {
+  pending_quote:['Awaiting quote','quote'], quoted:['Quote ready','quote'], approved:['Awaiting payment','quote'],
+  paid:['Paid','paid'], purchasing:['Purchasing','purchased'], ordered:['Ordered','purchased'],
+  shipped_intl:['Shipped','shipped'], arrived_bd:['In Bangladesh','shipped'], delivered:['Delivered','delivered'],
+  rejected:['Declined by us','closed'], cancelled:['Cancelled','closed'], expired:['Quote expired','closed']
+};
+const PX_CLOSED_MSG = {
+  rejected:'We could not take this request. Contact us on WhatsApp for details.',
+  cancelled:'This request was cancelled.',
+  expired:'This quote expired. Send a new request or message us to get a fresh quote.'
+};
+function pxEsc(t){ return String(t==null?'':t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function pxDate(iso){
+  const d = new Date(iso); if(isNaN(d)) return '';
+  return d.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]+' '+d.getFullYear();
+}
+function pxUsd(n){ return '$'+(Number(n)||0).toFixed(2); }
+function pxBdt(n){ return '৳'+Math.round(Number(n)||0).toLocaleString('en-US'); }
+
+function pxRender(r){
+  const snap = r.product_snapshot || {};
+  const items = (snap.items || []).map(i => ({ name:i.name||'Product', store:i.store||'', qty:Math.max(1,parseInt(i.qty,10)||1), price:Number(i.price)||0 }));
+  const f = r.fee_snapshot || {};
+  const usd = items.reduce((t,i)=>t+i.qty*i.price,0);
+  const taxP = Number(f.sales_tax)||0, svcP = Number(f.service_charge)||0, rate = Number(f.usd_rate)||0;
+  const tax = usd*taxP/100, svc = usd*svcP/100;
+  const est = rate ? (usd+tax+svc)*rate : 0;
+  const quoted = r.quote_total != null;
+  const pill = PX_PILL[r.status] || [r.status,'quote'];
+  const ord = r.orders || null;
+  const isOrder = !!(ord && ord.order_number);
+  const idPill = isOrder ? '<span class="oc-id-label">Order ID</span><div class="oc-id proxy">'+pxEsc(ord.order_number)+'</div>'
+                         : '<span class="oc-id-label">Request ID</span><div class="oc-id rq">'+pxEsc(r.request_no||'RQ')+'</div>';
+  const expired = r.status==='quoted' && r.expires_at && new Date(r.expires_at) < new Date();
+  const closed = ['rejected','cancelled','expired'].includes(r.status) || expired;
+  const curIdx = PX_FLOW.findIndex(x => x.k === r.status);
+
+  const itemRows = items.map(i =>
+    '<div class="oc-item-row"><div style="flex:1;min-width:0"><div class="oc-item-name-row"><div class="oc-item-name">'+pxEsc(i.name)+'</div></div>'
+    +(i.store?'<div class="oc-item-sub">'+pxEsc(i.store)+'</div>':'')+'</div>'
+    +'<div class="oc-item-math"><div class="oc-item-qtyprice">'+i.qty+' × '+pxUsd(i.price)+'</div><div class="oc-item-linetotal">'+pxUsd(i.qty*i.price)+'</div></div></div>').join('');
+
+  let math = '<div class="oc-math-card">';
+  if(usd>0){
+    math += '<div class="oc-math-row"><span>Product cost</span><span>'+pxUsd(usd)+'</span></div>';
+    if(rate){
+      math += '<div class="oc-math-row"><span>US sales tax ('+taxP+'%)</span><span>'+pxUsd(tax)+'</span></div>'
+            + '<div class="oc-math-row"><span>Service charge ('+svcP+'%)</span><span>'+pxUsd(svc)+'</span></div>'
+            + '<div class="oc-math-row"><span>Rate</span><span>1 USD = '+pxBdt(rate)+'</span></div>';
+    }
+  }
+  if(quoted) math += '<div class="oc-math-row total"><span>Final price</span><span>'+pxBdt(r.quote_total)+'</span></div>';
+  else if(est) math += '<div class="oc-math-row total"><span>Estimate (final after quote)</span><span>'+pxBdt(est)+'</span></div>';
+  math += '</div>';
+  const preview = quoted ? pxBdt(r.quote_total) : (est ? '≈ '+pxBdt(est) : '');
+
+  let action = '';
+  if(r.status==='quoted' && !expired){
+    action = '<div class="px-quote"><div class="px-quote-top"><div><div class="px-quote-lbl">Your quote</div><div class="px-quote-amt">'+pxBdt(r.quote_total)+'</div></div>'
+      + (r.expires_at?'<div class="px-quote-exp">Valid until<br>'+pxDate(r.expires_at)+'</div>':'')+'</div>'
+      + '<div class="px-quote-btns"><button class="px-btn decline" data-act="decline" data-id="'+r.id+'">Decline</button><button class="px-btn accept" data-act="accept" data-id="'+r.id+'">Accept &amp; confirm</button></div></div>';
+  } else if(r.status==='approved' && r.order_id){
+    action = '<div class="px-quote"><div class="px-quote-top"><div><div class="px-quote-lbl">Amount to pay</div><div class="px-quote-amt">'+pxBdt(r.quote_total)+'</div></div></div>'
+      + '<div class="px-quote-btns"><button class="px-btn pay" data-act="pay" data-id="'+pxEsc(r.order_id)+'">Pay now</button></div></div>';
+  } else if(r.status==='pending_quote'){
+    action = '<div class="px-info">We are reviewing your request. We will send your quote on WhatsApp.</div>';
+  }
+  if(closed){
+    action = '<div class="px-banner">'+pxEsc(expired ? PX_CLOSED_MSG.expired : (PX_CLOSED_MSG[r.status]||''))+'</div>';
+  }
+
+  let timeline = '';
+  if(!closed){
+    const dateFor = (k) => k==='pending_quote' ? r.created_at : k==='quoted' ? r.quoted_at : (k===r.status ? r.updated_at : '');
+    timeline = '<div><div class="oc-section-label">Order Timeline</div><div class="oc-vprogress">'
+      + PX_FLOW.map((st,i)=>({st,i})).reverse().map(({st,i}) => {
+          const done = i <= curIdx, cur = i === curIdx;
+          const d = done ? dateFor(st.k) : '';
+          return '<div class="oc-vstep'+(done?' done':'')+(cur?' current':'')+(st.k==='delivered'?' delivered':'')+'">'
+            +'<div class="oc-vstep-rail"><div class="oc-vdot"></div><div class="oc-vline"></div></div>'
+            +'<div class="oc-vstep-body"><div class="oc-vstep-title">'+pxEsc(st.t)+'</div>'+(d?'<div class="oc-vstep-day">'+pxDate(d)+'</div>':'')+'</div></div>';
+        }).join('')
+      + '</div></div>';
+  }
+
+  return '<div class="order-card" data-rid="'+r.id+'">'
+    +'<div class="oc-head" onclick="this.closest(\'.order-card\').classList.toggle(\'collapsed\')">'
+      +'<div class="oc-head-left"><div class="oc-id-row">'+idPill+'</div><div class="oc-meta">Submitted <span class="oc-meta-date">'+pxDate(r.created_at)+'</span></div></div>'
+      +'<div class="oc-head-right"><div class="oc-status-wrap"><span class="oc-status-pill '+(expired?'closed':pill[1])+'">'+pxEsc(expired?'Quote expired':pill[0])+'</span></div>'
+      +'<svg class="oc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div></div>'
+    +'<div class="oc-body">'+action
+      +'<div class="oc-subsection"><div class="oc-subhead" onclick="this.closest(\'.oc-subsection\').classList.toggle(\'collapsed\')"><div class="oc-section-label">Items &amp; Summary</div>'
+      +'<div class="oc-subhead-right"><span class="oc-subtotal-preview">'+preview+'</span><svg class="oc-sub-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div></div>'
+      +'<div class="oc-subsection-content"><div>'+itemRows+math+'</div></div></div>'
+      +(snap.notes?'<div class="px-note">'+pxEsc(snap.notes)+'</div>':'')
+      +timeline
+    +'</div></div>';
+}
+
+async function loadProxyOrders(){
+  const list = document.getElementById('proxyList');
+  if(!list) return;
+  let session = null;
+  try{ const r = await sbClient.auth.getSession(); session = r.data && r.data.session; }catch(e){}
+  if(!session){
+    list.innerHTML = '<div class="px-state">Log in to see your Buy For Me requests.<br><br><a href="login.html" id="pxLoginLink">Log in</a></div>';
+    const l = document.getElementById('pxLoginLink');
+    if(l) l.addEventListener('click', () => { try{ sessionStorage.setItem('sv-login-return','orders.html'); }catch(e){} });
+    return;
+  }
+  const { data, error } = await sbClient.from('proxy_requests')
+    .select('*, orders(order_number,status)').order('created_at', { ascending:false });
+  if(error){ console.error('proxy_requests load error:', error); list.innerHTML = '<div class="px-state">Could not load your requests. Pull down to retry.</div>'; return; }
+  if(!data || !data.length){
+    list.innerHTML = '<div class="px-state">No Buy For Me requests yet.<br><br><a href="buy_for_me.html">Send your first request</a></div>';
+    return;
+  }
+  const open = new Set([...list.querySelectorAll('.order-card:not(.collapsed)')].map(c=>c.dataset.rid));
+  list.innerHTML = data.map(pxRender).join('');
+  if(open.size) list.querySelectorAll('.order-card').forEach(c => { if(!open.has(c.dataset.rid)) c.classList.add('collapsed'); });
+}
+
+document.addEventListener('click', async function(e){
+  const b = e.target.closest && e.target.closest('.px-btn'); if(!b) return;
+  const act = b.dataset.act, id = b.dataset.id;
+  if(act==='pay'){ window.location.href = 'payment.html?order=' + encodeURIComponent(id); return; }
+  if(act==='decline' && !confirm('Decline this quote? The request will be cancelled.')) return;
+  b.disabled = true;
+  try{
+    const { error } = await sbClient.rpc('customer_respond_quote', { p_id:id, p_accept: act==='accept' });
+    if(error) throw error;
+  }catch(err){
+    console.error('customer_respond_quote error:', err);
+    alert('Could not update your request. Please try again.');
+  }
+  await loadProxyOrders();
+});
+
+if(location.hash === '#proxy') { tabProxy.click(); }
+loadProxyOrders();
+window.addEventListener('pageshow', loadProxyOrders);
+document.addEventListener('visibilitychange', function(){ if(!document.hidden) loadProxyOrders(); });
+</script>
+</body>
+</html>
